@@ -94,12 +94,12 @@ function buildSeparation(){
  cut.getContext('2d').putImageData(foreground,0,0);
  // Nearest valid ocean pixel inpainting. Keep original colors outside removed figure.
  const result=new Uint8ClampedArray(pixels),dist=new Int32Array(kept.length);
- const q=new Int32Array(kept.length);let head=0,tail=0;
+ dist.fill(-1);const q=new Int32Array(kept.length);let head=0,tail=0;
  for(let i=0;i<kept.length;i++)if(!kept[i]){dist[i]=0;q[tail++]=i;}
  while(head<tail){
   const n=q[head++],x=n%W,y=(n/W)|0;
   for(const k of [x>0?n-1:-1,x<W-1?n+1:-1,y>0?n-W:-1,y<H-1?n+W:-1]){
-   if(k>=0&&!dist[k]){dist[k]=dist[n]+1;const a=n*4,b=k*4;
+   if(k>=0&&dist[k]===-1){dist[k]=dist[n]+1;const a=n*4,b=k*4;
     result[b]=result[a];result[b+1]=result[a+1];result[b+2]=result[a+2];result[b+3]=255;q[tail++]=k;
    }
   }
