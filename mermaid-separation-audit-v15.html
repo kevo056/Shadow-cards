@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Story Forge • Mermaid Card Test</title><style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 20%,#263f52,#071019 75%);color:#eef6ff;font:16px system-ui,sans-serif;min-height:100dvh;display:flex;align-items:center;justify-content:center}.wrap{width:min(100%,560px);padding:20px;text-align:center}h1{font-size:21px;margin:0 0 8px}p{font-size:13px;opacity:.8}.stage{perspective:850px;touch-action:none;padding:22px 0}.card{width:min(78vw,330px);aspect-ratio:2/3;position:relative;margin:auto;transform-style:preserve-3d;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));border-radius:14px;box-shadow:0 25px 40px #0009;will-change:transform;overflow:hidden;touch-action:none}.card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}.foil{position:absolute;inset:0;pointer-events:none;background:
+linear-gradient(var(--angle,125deg),transparent 0%,rgba(255,209,88,.14) 18%,rgba(255,236,145,.52) 31%,rgba(255,255,238,1) 39%,rgba(255,225,130,.42) 48%,transparent 55%),
+linear-gradient(calc(var(--angle,125deg) + 88deg),transparent 0%,rgba(255,207,77,.24) 28%,rgba(255,248,188,.76) 43%,rgba(255,255,246,1) 50%,rgba(255,220,106,.58) 57%,transparent 75%),
+repeating-linear-gradient(calc(var(--angle,125deg) + 24deg),transparent 0%,transparent 7.65%,rgba(255,248,209,.32) 7.84%,rgba(255,255,247,.98) 7.96%,rgba(255,238,167,.25) 8.18%,transparent 8.42%,transparent 16%);mix-blend-mode:screen;opacity:var(--glow,1);-webkit-mask-size:100% 100%;mask-size:100% 100%}.holo{position:absolute;inset:0;pointer-events:none;opacity:.9;mix-blend-mode:screen;background:linear-gradient(var(--holo-angle,110deg),transparent 0%,rgba(67,238,255,.20) 18%,rgba(91,105,255,.52) 34%,rgba(255,93,225,.62) 48%,rgba(74,239,219,.55) 62%,rgba(111,149,255,.29) 77%,transparent 100%),repeating-linear-gradient(calc(var(--holo-angle,110deg) + 65deg),transparent 0%,rgba(135,255,248,.12) 5%,transparent 11%);-webkit-mask-size:100% 100%;mask-size:100% 100%}.separation{position:absolute;inset:0;pointer-events:none;width:100%;height:100%;object-fit:fill}.audit-tools{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px}.audit-tools button{font-size:12px;margin:0;padding:9px}.audit-tools button[aria-pressed="true"]{background:#45647a;border-color:#f5d18d}.card:after{content:"";position:absolute;inset:0;pointer-events:none;border:2px solid #d7aa51;border-radius:14px;box-shadow:inset 0 0 16px #ffe8a436}.controls{margin:14px auto 0;max-width:340px;text-align:left}.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}.controls input{width:67%;accent-color:#d5b16e}button{border:1px solid #c6a66b;background:#152a36;color:white;border-radius:9px;padding:9px 18px;margin-top:10px}.missing{padding:8px;color:#ffca9b;font-size:13px}</style></head><body><main class="wrap"><h1>Mermaid Card • Mermaid Separation Audit v15</h1><p>Drag the card or move the sliders. v15 static separation audit — no 3D parallax. Tap to inspect cutout and repaired ocean.</p><div class="stage" id="stage"><div class="card" id="card"><img src="./approved_original_mermaid.png" alt="Approved Story Forge mermaid card" id="art"><canvas class="separation" id="repaired" hidden></canvas><canvas class="separation" id="cutout" hidden></canvas><div class="holo"></div><div class="foil"></div></div></div><div id="missing" class="missing" hidden>Artwork not uploaded yet: approved_original_mermaid.png</div><div class="audit-tools"><button type="button" data-view="original">Original</button><button type="button" data-view="cutout">Mermaid only</button><button type="button" data-view="ocean">Repaired ocean</button><button type="button" data-view="composite">Composite</button></div><p id="audit-status">Preparing separation…</p><div class="controls"><label>Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label><label>Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label></div><button id="reset">Reset tilt</button><p id="status" aria-live="polite">Tilt: 0° / 0°</p></main><script>
+(()=>{const card=document.getElementById('card'),stage=document.getElementById('stage'),v=document.getElementById('vertical'),h=document.getElementById('horizontal'),status=document.getElementById('status');let down=false;function update(){const x=+v.value,y=+h.value;card.style.setProperty('--rx',x+'deg');card.style.setProperty('--ry',y+'deg');card.style.setProperty('--angle',(90+y*3.6-x*2.1)+'deg');card.style.setProperty('--holo-angle',(115-y*4+x*2.5)+'deg');card.style.setProperty('--left-y',(50-x*1.65+y*.6)+'%');card.style.setProperty('--right-y',(50+x*1.65-y*.6)+'%');card.style.setProperty('--left-x',(8+y*.34)+'%');card.style.setProperty('--right-x',(92+y*.34)+'%');card.style.setProperty('--glow',String(1));status.textContent='Tilt: '+x+'° / '+y+'°'}function move(e){if(!down)return;const r=stage.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;h.value=Math.round(Math.max(-22,Math.min(22,x*44)));v.value=Math.round(Math.max(-22,Math.min(22,-y*44)));update()}stage.addEventListener('pointerdown',e=>{down=true;stage.setPointerCapture(e.pointerId);move(e)});stage.addEventListener('pointermove',move);for(const type of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(type,()=>down=false);v.addEventListener('input',update);h.addEventListener('input',update);document.getElementById('reset').addEventListener('click',()=>{v.value=0;h.value=0;update()});const art=document.getElementById('art'),foil=card.querySelector('.foil');
+function buildGoldMask(){
+ // Image-derived ornament mask: only warm metallic pixels in the perimeter.
+ // Preserve the original PNG unchanged; generate an alpha mask in memory.
+ try{
+  const canvas=document.createElement('canvas');
+  const w=384,h=576;canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(art,0,0,w,h);
+  const img=ctx.getImageData(0,0,w,h),d=img.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   const i=(y*w+x)*4,r=d[i],g=d[i+1],b=d[i+2];
+   const edge=(x<65||x>w-66||y<62||y>h-63);
+   const warmth=r-g,blueGap=g-b;
+   const metallic=edge&&r>74&&g>43&&warmth>9&&blueGap>9&&r>b*1.35;
+   const fineDetail=Math.min(1,Math.max(0,(r-g-9)/42));
+   const strength=metallic?Math.min(255,Math.max(110,(r-50)*4.3+fineDetail*28)):0;
+   d[i]=255;d[i+1]=255;d[i+2]=255;d[i+3]=strength;
+  }
+  ctx.putImageData(img,0,0);
+  const url='url("'+canvas.toDataURL('image/png')+'")';
+  foil.style.webkitMaskImage=url;foil.style.maskImage=url;
+  foil.style.webkitMaskComposite='source-over';foil.style.maskComposite='add';
+  foil.style.webkitMaskSize='100% 100%';foil.style.maskSize='100% 100%';
+ }catch(e){
+  // Safari fallback: keep the known-working frame-only shine.
+  const edge='linear-gradient(to right,black 0 13%,transparent 13% 87%,black 87% 100%)';
+  const ends='linear-gradient(to bottom,black 0 10%,transparent 10% 90%,black 90% 100%)';
+  foil.style.webkitMaskImage=edge+','+ends;foil.style.maskImage=edge+','+ends;
+  foil.style.webkitMaskComposite='source-over';foil.style.maskComposite='add';
+ }
+}
+function buildOceanMask(){
+ const holo=card.querySelector('.holo');
+ try{
+  const c=document.createElement('canvas');const w=384,h=576;c.width=w;c.height=h;
+  const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(art,0,0,w,h);
+  const data=ctx.getImageData(0,0,w,h),p=data.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   const i=(y*w+x)*4,r=p[i],g=p[i+1],b=p[i+2];
+   // Exclude ornate outer frame, warm gold, gemstones and dark central silhouette.
+   const inside=x>60&&x<w-60&&y>64&&y<h-64;
+   const cool=b>r*1.12&&g>r*.94;
+   const bright=Math.max(r,g,b);
+   const darkFigure=bright<72;
+   const amount=inside&&cool&&!darkFigure?Math.min(220,Math.max(0,(bright-65)*2.1)):0;
+   p[i]=255;p[i+1]=255;p[i+2]=255;p[i+3]=amount;
+  }
+  ctx.putImageData(data,0,0);
+  const mask='url("'+c.toDataURL('image/png')+'")';
+  holo.style.webkitMaskImage=mask;holo.style.maskImage=mask;
+ }catch(e){holo.style.display='none';console.warn('Ocean hologram mask unavailable',e);}
+}
+function buildSeparation(){
+ const W=384,H=576,source=document.createElement('canvas');source.width=W;source.height=H;
+ const sc=source.getContext('2d',{willReadFrequently:true});sc.drawImage(art,0,0,W,H);
+ const src=sc.getImageData(0,0,W,H),pixels=src.data;
+ const cut=document.getElementById('cutout'),ocean=document.getElementById('repaired');
+ for(const c of [cut,ocean]){c.width=W;c.height=H;}
+ const mask=new Uint8Array(W*H);
+ // Conservative silhouette candidates; explicitly reject gold frame and bright water.
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  const i=(y*W+x)*4,r=pixels[i],g=pixels[i+1],b=pixels[i+2],lum=Math.max(r,g,b);
+  const dx=(x-189)/113,dy=(y-303)/215;
+  const zone=dx*dx+dy*dy<1.25&&x>71&&x<311&&y>86&&y<520;
+  mask[y*W+x]=zone&&lum<82&&r<g*1.16&&b<g*1.68?1:0;
+ }
+ // Keep only connected dark components anchored near the mermaid's torso.
+ const seen=new Uint8Array(mask.length),queue=new Int32Array(mask.length),components=[];
+ for(let i=0;i<mask.length;i++)if(mask[i]&&!seen[i]){
+  let h=0,t=0;queue[t++]=i;seen[i]=1;let anchor=false;
+  while(h<t){const n=queue[h++],x=n%W,y=(n/W)|0;
+   if(x>130&&x<249&&y>160&&y<390)anchor=true;
+   for(const k of [x>0?n-1:-1,x<W-1?n+1:-1,y>0?n-W:-1,y<H-1?n+W:-1]){
+    if(k>=0&&mask[k]&&!seen[k]){seen[k]=1;queue[t++]=k;}
+   }
+  }
+  if(t>40&&anchor)components.push(Array.from(queue.slice(0,t)));
+ }
+ const kept=new Uint8Array(mask.length);
+ for(const comp of components)for(const i of comp)kept[i]=1;
+ // Fill tiny interior gaps in the selected figure.
+ for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+  const i=y*W+x;if(!kept[i]&&kept[i-1]&&kept[i+1]&&kept[i-W]&&kept[i+W])kept[i]=1;
+ }
+ const foreground=sc.createImageData(W,H);foreground.data.set(pixels);
+ for(let i=0;i<kept.length;i++)foreground.data[i*4+3]=kept[i]?255:0;
+ cut.getContext('2d').putImageData(foreground,0,0);
+ // Nearest valid ocean pixel inpainting. Keep original colors outside removed figure.
+ const result=new Uint8ClampedArray(pixels),dist=new Int32Array(kept.length);
+ const q=new Int32Array(kept.length);let head=0,tail=0;
+ for(let i=0;i<kept.length;i++)if(!kept[i]){dist[i]=0;q[tail++]=i;}
+ while(head<tail){
+  const n=q[head++],x=n%W,y=(n/W)|0;
+  for(const k of [x>0?n-1:-1,x<W-1?n+1:-1,y>0?n-W:-1,y<H-1?n+W:-1]){
+   if(k>=0&&!dist[k]){dist[k]=dist[n]+1;const a=n*4,b=k*4;
+    result[b]=result[a];result[b+1]=result[a+1];result[b+2]=result[a+2];result[b+3]=255;q[tail++]=k;
+   }
+  }
+ }
+ const bgCtx=ocean.getContext('2d'),out=bgCtx.createImageData(W,H);out.data.set(result);bgCtx.putImageData(out,0,0);
+ // The audit is static: no independent movement, so edge problems are easy to spot.
+ document.getElementById('audit-status').textContent='Separation ready — inspect each view before adding any depth.';
+ function view(mode){
+  const original=mode==='original',only=mode==='cutout',water=mode==='ocean',composite=mode==='composite';
+  art.style.visibility=original?'visible':'hidden';
+  ocean.hidden=!(water||composite);cut.hidden=!(only||composite);
+  card.querySelector('.holo').style.display=original?'':'none';
+  foil.style.display=original?'':'none';
+  card.style.background=only?'#425e72':'#081a2c';
+  document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===mode)));
+ }
+ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.view)));
+ view('original');
+}
+function prepareMasks(){buildGoldMask();buildOceanMask();try{buildSeparation();}catch(e){document.getElementById('audit-status').textContent='Separation unavailable: '+e.message;console.error(e);}}
+if(art.complete&&art.naturalWidth)prepareMasks();else art.addEventListener('load',prepareMasks,{once:true});
+art.addEventListener('error',()=>{document.getElementById('missing').hidden=false});update()})();
+</script></body></html>
