@@ -1,20 +1,36 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Story Forge • Mermaid Card Test</title><style>
-:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 20%,#263f52,#071019 75%);color:#eef6ff;font:16px system-ui,sans-serif;min-height:100dvh;display:flex;align-items:center;justify-content:center}.wrap{width:min(100%,560px);padding:20px;text-align:center}h1{font-size:21px;margin:0 0 8px}p{font-size:13px;opacity:.8}.stage{perspective:850px;touch-action:none;padding:22px 0}.card{width:min(78vw,330px);aspect-ratio:2/3;position:relative;margin:auto;transform-style:preserve-3d;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));border-radius:14px;box-shadow:0 25px 40px #0009;will-change:transform;overflow:hidden;touch-action:none}.card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}.foil{position:absolute;inset:0;pointer-events:none;background:linear-gradient(var(--angle,125deg),transparent 0%,transparent 31%,rgba(255,210,95,.12) 39%,rgba(255,235,150,.58) 45%,rgba(255,255,232,1) 49.5%,rgba(255,245,198,.95) 51%,rgba(255,193,65,.35) 57%,transparent 67%,transparent 100%);mix-blend-mode:screen;opacity:var(--glow,.9);-webkit-mask-size:100% 100%;mask-size:100% 100%}.card:after{content:"";position:absolute;inset:0;pointer-events:none;border:2px solid #d7aa51;border-radius:14px;box-shadow:inset 0 0 16px #ffe8a436}.controls{margin:14px auto 0;max-width:340px;text-align:left}.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}.controls input{width:67%;accent-color:#d5b16e}button{border:1px solid #c6a66b;background:#152a36;color:white;border-radius:9px;padding:9px 18px;margin-top:10px}.missing{padding:8px;color:#ffca9b;font-size:13px}</style></head><body><main class="wrap"><h1>Mermaid Card • Gold Frame Test v3</h1><p>Drag the card or move the sliders. v3: Shine limited to outer gold frame. Center stays clear.</p><div class="stage" id="stage"><div class="card" id="card"><img src="./approved_original_mermaid.png" alt="Approved Story Forge mermaid card" id="art"><div class="foil"></div></div></div><div id="missing" class="missing" hidden>Artwork not uploaded yet: approved_original_mermaid.png</div><div class="controls"><label>Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label><label>Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label></div><button id="reset">Reset tilt</button><p id="status" aria-live="polite">Tilt: 0° / 0°</p></main><script>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 20%,#263f52,#071019 75%);color:#eef6ff;font:16px system-ui,sans-serif;min-height:100dvh;display:flex;align-items:center;justify-content:center}.wrap{width:min(100%,560px);padding:20px;text-align:center}h1{font-size:21px;margin:0 0 8px}p{font-size:13px;opacity:.8}.stage{perspective:850px;touch-action:none;padding:22px 0}.card{width:min(78vw,330px);aspect-ratio:2/3;position:relative;margin:auto;transform-style:preserve-3d;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));border-radius:14px;box-shadow:0 25px 40px #0009;will-change:transform;overflow:hidden;touch-action:none}.card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}.foil{position:absolute;inset:0;pointer-events:none;background:linear-gradient(var(--angle,125deg),transparent 0%,transparent 27%,rgba(255,210,95,.08) 34%,rgba(255,235,150,.38) 42%,rgba(255,255,240,1) 48.5%,rgba(255,250,214,1) 50%,rgba(255,206,91,.43) 56%,transparent 65%,transparent 100%);mix-blend-mode:screen;opacity:var(--glow,.9);-webkit-mask-size:100% 100%;mask-size:100% 100%}.card:after{content:"";position:absolute;inset:0;pointer-events:none;border:2px solid #d7aa51;border-radius:14px;box-shadow:inset 0 0 16px #ffe8a436}.controls{margin:14px auto 0;max-width:340px;text-align:left}.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}.controls input{width:67%;accent-color:#d5b16e}button{border:1px solid #c6a66b;background:#152a36;color:white;border-radius:9px;padding:9px 18px;margin-top:10px}.missing{padding:8px;color:#ffca9b;font-size:13px}</style></head><body><main class="wrap"><h1>Mermaid Card • Gold Ornament Test v4</h1><p>Drag the card or move the sliders. v4: Detailed gold ornaments shimmer independently; art stays unchanged.</p><div class="stage" id="stage"><div class="card" id="card"><img src="./approved_original_mermaid.png" alt="Approved Story Forge mermaid card" id="art"><div class="foil"></div></div></div><div id="missing" class="missing" hidden>Artwork not uploaded yet: approved_original_mermaid.png</div><div class="controls"><label>Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label><label>Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label></div><button id="reset">Reset tilt</button><p id="status" aria-live="polite">Tilt: 0° / 0°</p></main><script>
 (()=>{const card=document.getElementById('card'),stage=document.getElementById('stage'),v=document.getElementById('vertical'),h=document.getElementById('horizontal'),status=document.getElementById('status');let down=false;function update(){const x=+v.value,y=+h.value;card.style.setProperty('--rx',x+'deg');card.style.setProperty('--ry',y+'deg');card.style.setProperty('--angle',(125+y*2-x)+'deg');card.style.setProperty('--glow',String(.84+(Math.abs(x)+Math.abs(y))/130));status.textContent='Tilt: '+x+'° / '+y+'°'}function move(e){if(!down)return;const r=stage.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;h.value=Math.round(Math.max(-22,Math.min(22,x*44)));v.value=Math.round(Math.max(-22,Math.min(22,-y*44)));update()}stage.addEventListener('pointerdown',e=>{down=true;stage.setPointerCapture(e.pointerId);move(e)});stage.addEventListener('pointermove',move);for(const type of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(type,()=>down=false);v.addEventListener('input',update);h.addEventListener('input',update);document.getElementById('reset').addEventListener('click',()=>{v.value=0;h.value=0;update()});const art=document.getElementById('art'),foil=card.querySelector('.foil');
 function buildGoldMask(){
- // Opaque edge-only mask: the inner 76% of the card is always transparent.
- // Use CSS gradients rather than SVG luminance masks for iOS Safari reliability.
- const edge='linear-gradient(to right,black 0 13%,transparent 13% 87%,black 87% 100%)';
- const topBottom='linear-gradient(to bottom,black 0 10%,transparent 10% 90%,black 90% 100%)';
- foil.style.webkitMaskImage=edge+','+topBottom;
- foil.style.maskImage=edge+','+topBottom;
- foil.style.webkitMaskComposite='source-over';
- foil.style.maskComposite='add';
- foil.style.webkitMaskRepeat='no-repeat';
- foil.style.maskRepeat='no-repeat';
- foil.style.webkitMaskSize='100% 100%';
- foil.style.maskSize='100% 100%';
+ // Image-derived ornament mask: only warm metallic pixels in the perimeter.
+ // Preserve the original PNG unchanged; generate an alpha mask in memory.
+ try{
+  const canvas=document.createElement('canvas');
+  const w=384,h=576;canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(art,0,0,w,h);
+  const img=ctx.getImageData(0,0,w,h),d=img.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   const i=(y*w+x)*4,r=d[i],g=d[i+1],b=d[i+2];
+   const edge=(x<65||x>w-66||y<62||y>h-63);
+   const warmth=r-g,blueGap=g-b;
+   const metallic=edge&&r>74&&g>43&&warmth>9&&blueGap>9&&r>b*1.35;
+   const strength=metallic?Math.min(255,Math.max(0,(r-70)*2.6)):0;
+   d[i]=255;d[i+1]=255;d[i+2]=255;d[i+3]=strength;
+  }
+  ctx.putImageData(img,0,0);
+  const url='url("'+canvas.toDataURL('image/png')+'")';
+  foil.style.webkitMaskImage=url;foil.style.maskImage=url;
+  foil.style.webkitMaskComposite='source-over';foil.style.maskComposite='add';
+  foil.style.webkitMaskSize='100% 100%';foil.style.maskSize='100% 100%';
+ }catch(e){
+  // Safari fallback: keep the known-working frame-only shine.
+  const edge='linear-gradient(to right,black 0 13%,transparent 13% 87%,black 87% 100%)';
+  const ends='linear-gradient(to bottom,black 0 10%,transparent 10% 90%,black 90% 100%)';
+  foil.style.webkitMaskImage=edge+','+ends;foil.style.maskImage=edge+','+ends;
+  foil.style.webkitMaskComposite='source-over';foil.style.maskComposite='add';
+ }
 }
 if(art.complete&&art.naturalWidth)buildGoldMask();else art.addEventListener('load',buildGoldMask,{once:true});
 art.addEventListener('error',()=>{document.getElementById('missing').hidden=false});update()})();
