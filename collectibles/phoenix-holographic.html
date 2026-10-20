@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Phoenix • Holographic | Story Forge</title>
+<style>
+*{box-sizing:border-box}
+:root{color-scheme:dark}
+body{margin:0;min-height:100dvh;background:radial-gradient(circle at 50% 18%,#49351b,#0e0d10 78%);color:#f7e9c7;font:16px system-ui,sans-serif;display:grid;place-items:center}
+.wrap{width:min(100%,540px);padding:18px 16px;text-align:center}
+h1{font-size:22px;margin:0 0 8px}
+p{font-size:13px;color:#d9c9ad}
+.stage{perspective:900px;padding:22px 0;touch-action:none}
+.card{
+  position:relative;margin:auto;width:min(82vw,355px);
+  aspect-ratio:2/3;overflow:hidden;border-radius:14px;background:#000;
+  transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  box-shadow:0 25px 40px #0009;
+  will-change:transform;isolation:isolate;touch-action:none;
+}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.art{z-index:1;clip-path:inset(4.15% round 9px)}
+.bottom-black{position:absolute;z-index:2;inset:92.1% 0 0;background:#000;pointer-events:none}
+.frame{z-index:3;object-fit:fill}
+.gem{position:absolute;z-index:5;left:50%;top:3.5969%;width:6.15%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 34% 25%,#fffbd3 0%,#ffe968 16%,#e6a914 43%,#96600a 72%,#422904 100%);box-shadow:inset 0 0 2px 1px #62400a,0 0 4px #ffe17a;pointer-events:none}
+.gem:before{content:'';position:absolute;inset:14%;background:linear-gradient(140deg,#fff6ba 0 25%,#f6cc37 26% 48%,#b7790d 49% 74%,#ffec76 75%);clip-path:polygon(50% 0,90% 30%,80% 76%,50% 100%,18% 72%,10% 28%);opacity:.92}
+.gem.bottom{top:92.60%;width:6.65%}
+/* Crisp narrow diffraction bands, not a broad pastel haze.
+   Applied only after the dark-cutout exclusion mask has loaded. */
+.holo{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  opacity:var(--holo-opacity,.92);mix-blend-mode:screen;
+  clip-path:inset(4.15% round 9px);
+  background:linear-gradient(var(--holo-angle,115deg),
+    transparent 8%,
+    rgba(102,210,254,.04) 23%,
+    rgba(103,217,255,.50) 29%,
+    rgba(211,130,247,.52) 33%,
+    rgba(255,227,144,.24) 38%,
+    transparent 44%,
+    transparent 57%,
+    rgba(80,205,246,.13) 61%,
+    rgba(117,225,248,.47) 66%,
+    rgba(244,142,245,.38) 70%,
+    transparent 75%);
+}
+/* Both sweep parents STAY PUT so the exclusion masks never drift across the black Phoenix.
+   Only the narrow inner beams move with inexpensive transforms. */
+.art-glint{
+  position:absolute;z-index:2;inset:0;pointer-events:none;
+  overflow:hidden;clip-path:inset(4.15% round 9px);mix-blend-mode:screen
+}
+.art-beam{
+  position:absolute;top:-22%;left:-47%;width:40%;height:144%;
+  background:linear-gradient(90deg,transparent,rgba(254,246,223,.08) 25%,
+    rgba(245,221,255,.42) 43%,rgba(255,255,255,.56) 50%,
+    rgba(156,225,255,.39) 59%,transparent 83%);
+  transform:translate3d(0,0,0) skewX(-12deg);
+  animation:art-pass 7.3s ease-in-out infinite;
+  will-change:transform;
+}
+.gold-foil{
+  position:absolute;z-index:6;inset:0;pointer-events:none;
+  overflow:hidden;mix-blend-mode:screen;
+  background:linear-gradient(125deg,transparent 6%,
+    rgba(255,214,98,.17) 24%,rgba(255,248,201,.40) 43%,
+    rgba(255,255,224,.55) 53%,rgba(255,212,120,.30) 66%,
+    transparent 84%);
+}
+.gold-beam{
+  position:absolute;top:-22%;left:-48%;width:43%;height:144%;
+  background:linear-gradient(90deg,transparent 7%,rgba(255,218,112,.20) 21%,
+    rgba(255,243,173,.66) 40%,rgba(255,255,244,.98) 50%,
+    rgba(255,240,151,.66) 62%,transparent 93%);
+  transform:translate3d(0,0,0) skewX(-12deg);
+  animation:gold-pass 4.8s ease-in-out infinite;
+  will-change:transform;
+}
+@keyframes gold-pass{
+  0%,13%{transform:translate3d(0,0,0) skewX(-12deg);opacity:0}
+  18%{opacity:1}
+  64%{opacity:1}
+  75%,100%{transform:translate3d(365%,0,0) skewX(-12deg);opacity:0}
+}
+@keyframes art-pass{
+  0%,13%{transform:translate3d(0,0,0) skewX(-12deg);opacity:0}
+  19%{opacity:1}
+  60%{opacity:.76}
+  74%,100%{transform:translate3d(385%,0,0) skewX(-12deg);opacity:0}
+}
+.card:not(.fx-ready) .holo,.card:not(.fx-ready) .art-glint{opacity:0;visibility:hidden}
+.card:not(.foil-ready) .gold-foil{opacity:0;visibility:hidden}
+.card.paused .art-beam,.card.paused .gold-beam{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){
+  .art-beam,.gold-beam{animation:none!important;opacity:.17;transform:translate3d(100%,0,0) skewX(-12deg)}
+}
+
+/* v7: limited, CSS-only particles; one shared art mask preserves the black
+   cutout with no per-frame canvas work or newly generated image assets. */
+.sparkle-field{
+  position:absolute;z-index:2;inset:0;pointer-events:none;overflow:hidden;
+  clip-path:inset(4.15% round 9px);mix-blend-mode:screen;
+}
+.sparkle-field i{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);
+  display:block;pointer-events:none;opacity:0;will-change:transform,opacity;
+  animation-delay:var(--delay);animation-duration:var(--t);animation-timing-function:ease-in-out;
+  animation-iteration-count:infinite;
+}
+.sparkle-field .orb{
+  border-radius:50%;background:radial-gradient(circle at 44% 40%,
+    rgba(255,255,245,1) 0%,rgba(255,245,193,.98) 18%,rgba(255,208,88,.72) 38%,
+    rgba(255,195,72,.21) 65%,transparent 95%);
+  box-shadow:0 0 6px 1px rgba(255,203,99,.27);
+  animation-name:orb-drift;
+}
+.sparkle-field .star{
+  background:radial-gradient(circle,rgba(255,255,250,1) 0 8%,
+    rgba(255,244,187,.82) 9% 17%,rgba(255,205,95,.15) 34%,transparent 70%);
+  animation-name:star-twinkle;
+}
+.sparkle-field .star:before,.sparkle-field .star:after{
+  content:"";position:absolute;display:block;inset:0;
+}
+.sparkle-field .star:before{background:linear-gradient(90deg,transparent 4%,
+  rgba(255,243,192,.13) 28%,rgba(255,255,242,.96) 50%,
+  rgba(255,243,192,.13) 72%,transparent 96%);
+  height:11%;top:44.5%;
+}
+.sparkle-field .star:after{background:linear-gradient(transparent 4%,
+  rgba(255,243,192,.13) 28%,rgba(255,255,242,.94) 50%,
+  rgba(255,243,192,.13) 72%,transparent 96%);
+  width:11%;left:44.5%;
+}
+@keyframes orb-drift{
+  0%{transform:translate3d(0,13px,0) scale(.72);opacity:0}
+  24%{opacity:.78}
+  59%{opacity:.68}
+  88%{opacity:.18}
+  100%{transform:translate3d(8px,-30px,0) scale(1.06);opacity:0}
+}
+@keyframes star-twinkle{
+  0%,17%{transform:translate3d(0,0,0) scale(.57);opacity:0}
+  29%{transform:translate3d(0,-1px,0) scale(1.12);opacity:.92}
+  44%{opacity:.15}
+  60%{transform:translate3d(2px,-4px,0) scale(.75);opacity:.55}
+  80%,100%{transform:translate3d(3px,-7px,0) scale(.65);opacity:0}
+}
+.card:not(.fx-ready) .sparkle-field{visibility:hidden;opacity:0}
+.card.paused .sparkle-field i{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){
+  .sparkle-field i{animation:none!important;will-change:auto}
+  .sparkle-field .orb{opacity:.38;transform:none}
+  .sparkle-field .star{opacity:.30;transform:none}
+}
+
+.controls{max-width:340px;margin:12px auto;text-align:left}
+.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}
+.controls input{width:65%;accent-color:#cfa454}
+button{background:#241c13;border:1px solid #bd9653;border-radius:8px;color:#f7e9c7;padding:9px 18px}
+#status{min-height:20px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Phoenix • Holographic</h1>
+<p>Approved holographic Phoenix • Floating golden orbs and twinkling sparkles</p>
+<div class="stage" id="stage"><div class="card" id="card">
+<img class="art" id="art" src="../Shadow%20Phoenix%20Over%20the%20Golden%20City%20(1).png" alt="Approved shadow-cutout Phoenix artwork">
+<div class="holo" id="holo" aria-hidden="true"></div>
+<div class="art-glint" id="art-glint" aria-hidden="true"><div class="art-beam"></div></div>
+<div class="sparkle-field" id="sparkle-field" aria-hidden="true">
+<i class="orb" style="--x:17%;--y:66%;--s:8px;--t:10.7s;--delay:-3.5s" aria-hidden="true"></i>
+<i class="orb" style="--x:29%;--y:83%;--s:11px;--t:12.1s;--delay:-8.4s" aria-hidden="true"></i>
+<i class="orb" style="--x:55%;--y:88%;--s:7px;--t:11.6s;--delay:-2.2s" aria-hidden="true"></i>
+<i class="orb" style="--x:75%;--y:71%;--s:9px;--t:13.4s;--delay:-11.1s" aria-hidden="true"></i>
+<i class="orb" style="--x:84%;--y:56%;--s:7px;--t:12.2s;--delay:-6.2s" aria-hidden="true"></i>
+<i class="orb" style="--x:40%;--y:95%;--s:6px;--t:9.4s;--delay:-4.8s" aria-hidden="true"></i>
+<i class="orb" style="--x:66%;--y:29%;--s:8px;--t:14.3s;--delay:-9.0s" aria-hidden="true"></i>
+<i class="orb" style="--x:24%;--y:37%;--s:6px;--t:11.4s;--delay:-7.1s" aria-hidden="true"></i>
+<i class="orb" style="--x:60%;--y:60%;--s:7px;--t:13s;--delay:-1.8s" aria-hidden="true"></i>
+<i class="orb" style="--x:80%;--y:86%;--s:6px;--t:10.3s;--delay:-5.1s" aria-hidden="true"></i>
+<i class="star" style="--x:18%;--y:79%;--s:18px;--t:5.1s;--delay:-1.5s" aria-hidden="true"></i>
+<i class="star" style="--x:69%;--y:82%;--s:15px;--t:6.5s;--delay:-3.8s" aria-hidden="true"></i>
+<i class="star" style="--x:81%;--y:39%;--s:13px;--t:6.2s;--delay:-4.1s" aria-hidden="true"></i>
+<i class="star" style="--x:43%;--y:68%;--s:15px;--t:5.7s;--delay:-2.7s" aria-hidden="true"></i>
+</div>
+<div class="bottom-black" aria-hidden="true"></div>
+<img class="frame" id="frame" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png" alt="Original gold card frame">
+<div class="gem top" aria-label="Top golden gemstone"></div>
+<div class="gem bottom" aria-label="Bottom golden gemstone"></div>
+<div class="gold-foil" id="gold-foil" aria-hidden="true"><div class="gold-beam"></div></div>
+</div></div>
+<div class="controls">
+<label for="vertical">Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label>
+<label for="horizontal">Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label>
+</div>
+<button id="reset">Reset tilt</button>
+<p id="status" role="status">Loading artwork and frame…</p>
+</main>
+<script>
+'use strict';
+const card=document.getElementById('card');
+const stage=document.getElementById('stage');
+const vertical=document.getElementById('vertical');
+const horizontal=document.getElementById('horizontal');
+const art=document.getElementById('art');
+const frame=document.getElementById('frame');
+const status=document.getElementById('status');
+const holo=document.getElementById('holo');
+const artGlint=document.getElementById('art-glint');
+const sparkleField=document.getElementById('sparkle-field');
+const goldFoil=document.getElementById('gold-foil');
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+let queued=false;
+function renderTilt(){
+  queued=false;
+  const x=Number(horizontal.value),y=Number(vertical.value);
+  card.style.setProperty('--rx',y+'deg');
+  card.style.setProperty('--ry',x+'deg');
+  card.style.setProperty('--holo-angle',(115+x*2.8)+'deg');
+  card.style.setProperty('--holo-opacity',String(.85+Math.abs(x)/450));
+}
+function queueTilt(){
+  if(queued)return;
+  queued=true;requestAnimationFrame(renderTilt);
+}
+vertical.addEventListener('input',queueTilt);
+horizontal.addEventListener('input',queueTilt);
+document.getElementById('reset').addEventListener('click',()=>{
+  vertical.value=0;horizontal.value=0;queueTilt();
+});
+let dragging=false;
+stage.addEventListener('pointerdown',e=>{
+  dragging=true;stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const r=card.getBoundingClientRect();
+  horizontal.value=Math.round(clamp(((e.clientX-r.left)/r.width-.5)*44,-22,22));
+  vertical.value=Math.round(clamp((.5-(e.clientY-r.top)/r.height)*44,-22,22));
+  queueTilt();
+});
+for(const type of ['pointerup','pointercancel','lostpointercapture']){
+  stage.addEventListener(type,()=>{dragging=false;});
+}
+function maskImage(canvas){
+  return 'url("'+canvas.toDataURL('image/png')+'")';
+}
+function attachMask(el,url){
+  el.style.webkitMaskImage=url;
+  el.style.maskImage=url;
+  el.style.webkitMaskRepeat='no-repeat';
+  el.style.maskRepeat='no-repeat';
+  el.style.webkitMaskSize='100% 100%';
+  el.style.maskSize='100% 100%';
+}
+function installArtMask(){
+  const c=document.createElement('canvas');
+  c.width=384;c.height=576;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.drawImage(art,0,0,c.width,c.height);
+  const p=x.getImageData(0,0,c.width,c.height),d=p.data;
+  for(let i=0;i<d.length;i+=4){
+    const peak=Math.max(d[i],d[i+1],d[i+2]);
+    const diff=peak-Math.min(d[i],d[i+1],d[i+2]);
+    let alpha=clamp((peak-42)/66,0,1);
+    if(diff>36&&peak>68)alpha=Math.max(alpha,.90);
+    d[i]=d[i+1]=d[i+2]=255;
+    d[i+3]=Math.round(alpha*d[i+3]);
+  }
+  x.putImageData(p,0,0);
+  const url=maskImage(c);
+  attachMask(holo,url);
+  attachMask(artGlint,url);
+  attachMask(sparkleField,url);
+  card.classList.add('fx-ready');
+  c.width=c.height=0;
+}
+function installGoldMask(){
+  const c=document.createElement('canvas');
+  c.width=512;c.height=768;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.drawImage(frame,0,0,c.width,c.height);
+  const p=x.getImageData(0,0,c.width,c.height),d=p.data;
+  for(let y=0;y<768;y++){
+    for(let xx=0;xx<512;xx++){
+      const i=(y*512+xx)*4,r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
+      const edge=xx<87||xx>424||y<83||y>685;
+      const gold=edge&&a>10&&r>68&&g>36&&r-g>8&&g-b>7&&r>b*1.24;
+      const strength=gold?Math.round(Math.min(255,Math.max(165,(r-35)*4.4))*a/255):0;
+      d[i]=d[i+1]=d[i+2]=255;
+      d[i+3]=strength;
+    }
+  }
+  x.putImageData(p,0,0);
+  attachMask(goldFoil,maskImage(c));
+  card.classList.add('foil-ready');
+  c.width=c.height=0;
+}
+function imageLoaded(img){
+  return new Promise((resolve,reject)=>{
+    if(img.complete){img.naturalWidth?resolve():reject(new Error('Asset failed: '+img.src));return;}
+    img.addEventListener('load',resolve,{once:true});
+    img.addEventListener('error',()=>reject(new Error('Asset failed: '+img.src)),{once:true});
+  });
+}
+function manageVisibility(){
+  card.classList.toggle('paused',document.hidden||!card.classList.contains('on-screen'));
+}
+if('IntersectionObserver' in window){
+  const observer=new IntersectionObserver(e=>{
+    card.classList.toggle('on-screen',e[0].isIntersecting);
+    manageVisibility();
+  },{threshold:.05});
+  observer.observe(stage);
+}else{card.classList.add('on-screen');}
+document.addEventListener('visibilitychange',manageVisibility);
+renderTilt();
+Promise.all([imageLoaded(art),imageLoaded(frame)]).then(()=>{
+  try{installArtMask();}catch(e){console.warn('Black-cutout mask failed:',e);}
+  try{installGoldMask();}catch(e){console.warn('Foil mask failed:',e);}
+  status.textContent=card.classList.contains('fx-ready')&&card.classList.contains('foil-ready')
+    ?'Phoenix holographic card ready.'
+    :'Artwork loaded; some holographic effects could not initialize.';
+  manageVisibility();
+}).catch(err=>{
+  status.textContent='Could not load Phoenix artwork or frame.';
+  console.error(err);
+});
+</script></body>
+</html>
