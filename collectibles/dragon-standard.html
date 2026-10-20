@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dragon • Standard | Story Forge</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(circle at 50% 20%,#623528,#160e16 75%);color:#eef6ff;font:16px system-ui,sans-serif;display:flex;align-items:center;justify-content:center}
+.wrap{width:min(100%,560px);padding:20px;text-align:center}
+h1{font-size:21px;margin:0 0 8px}
+p{font-size:13px;opacity:.8}
+.stage{position:relative;perspective:650px;touch-action:none;padding:22px 0;user-select:none;-webkit-user-select:none}
+.card{width:min(82vw,355px);aspect-ratio:1024/1516;position:relative;margin:auto;transform-style:preserve-3d;transform:rotateX(0deg) rotateY(0deg);border-radius:14px;box-shadow:0 25px 40px #0009;will-change:transform;overflow:hidden;touch-action:none;background:#000;isolation:isolate}
+.card canvas,.card img.frame{position:absolute;top:0;left:0;width:100%;height:101.3193%;object-fit:fill;pointer-events:none}
+.card canvas#art{z-index:1;display:block}
+.card .bottom-rail-backing{position:absolute;z-index:3;left:0;right:0;top:92.1%;bottom:0;background:#000;pointer-events:none}
+.card .frame{z-index:4}
+.ruby{z-index:5;position:absolute;left:50%;width:6.15%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 34% 25%,#ffb4a0 0%,#f83135 16%,#b70018 43%,#66000b 72%,#250006 100%);box-shadow:inset 0 0 2px 1px #40000b,0 0 3px #ff553b;pointer-events:none}
+.ruby:before{content:'';position:absolute;inset:14%;background:linear-gradient(140deg,#ff9a80 0 25%,#cb0920 26% 48%,#75000c 49% 74%,#ff3640 75%);clip-path:polygon(50% 0,90% 30%,80% 76%,50% 100%,18% 72%,10% 28%);opacity:.88}
+.ruby.top{top:3.5969%}
+.ruby.bottom{top:93.8216%;width:6.65%}
+.controls{margin:14px auto 0;max-width:340px;text-align:left}
+.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}
+.controls input{width:67%;accent-color:#d5b16e}
+button{border:1px solid #c6a66b;background:#152a36;color:white;border-radius:9px;padding:9px 18px;margin-top:10px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Dragon • Standard</h1>
+<p>Original Dragon artwork, gold trim and ruby gems, with interactive tilt and no holographic effects.</p>
+<div class="stage" id="stage"><div class="card" id="card">
+<canvas id="art" width="1024" height="1536" role="img" aria-label="Black dragon over its approved fantasy landscape"></canvas>
+<div class="bottom-rail-backing" aria-hidden="true"></div>
+<img class="frame" id="frame" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png" alt="Original gold card trim">
+<div class="ruby top" aria-hidden="true"></div>
+<div class="ruby bottom" aria-hidden="true"></div>
+</div></div>
+<div class="controls">
+<label for="vertical">Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label>
+<label for="horizontal">Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label>
+</div>
+<button id="reset">Reset tilt</button>
+<p id="tilt-status" aria-live="off">Tilt: 0° horizontal / 0° vertical</p>
+<p id="art-status" role="status">Loading Dragon artwork…</p>
+</main>
+<script>
+'use strict';
+// Preserve the approved Dragon v24 artwork crop, ruby alignment and black lower backing.
+const cv=document.getElementById('art'),ctx=cv.getContext('2d'),artStatus=document.getElementById('art-status');const img=new Image();img.onload=()=>{const w=cv.width,h=cv.height;ctx.drawImage(img,0,0,w,h);/* Local elliptical, softly feathered reconstruction; avoids visible rectangular seams. */function repair(cx,cy,rx,ry){const src=ctx.getImageData(0,0,w,h),out=ctx.createImageData(w,h);out.data.set(src.data);for(let y=Math.max(0,Math.floor(cy-ry));y<Math.min(h,Math.ceil(cy+ry));y++){for(let x=Math.max(0,Math.floor(cx-rx));x<Math.min(w,Math.ceil(cx+rx));x++){const nx=(x-cx)/rx,ny=(y-cy)/ry,dist=Math.sqrt(nx*nx+ny*ny);if(dist>=1)continue;const blend=Math.min(1,Math.max(0,(1-dist)/.35));const sx1=Math.max(0,Math.round(cx-rx-16)),sx2=Math.min(w-1,Math.round(cx+rx+16));const t=Math.max(0,Math.min(1,(nx+1)/2));const t2=t*t*(3-2*t);const d=(y*w+x)*4,a=(y*w+sx1)*4,b=(y*w+sx2)*4;for(let k=0;k<3;k++){const v=src.data[a+k]*(1-t2)+src.data[b+k]*t2;out.data[d+k]=Math.round(src.data[d+k]*(1-blend)+v*blend)}}}ctx.putImageData(out,0,0)}repair(w*.5,h*.038,w*.087,h*.065);repair(w*.5,h*.963,w*.089,h*.065);/* Mask the unwanted outer perimeter of the original artwork, keeping the artwork beneath the gold ornament intact. */ctx.save();ctx.globalCompositeOperation='destination-in';ctx.beginPath();const insetX=w*.041,insetTop=h*.020,insetBottom=h*.921;ctx.roundRect(insetX,insetTop,w-2*insetX,insetBottom-insetTop,Math.min(w*.055,h*.035));ctx.fill();ctx.restore();artStatus.textContent='Dragon artwork loaded. Artwork blacked beneath lower gold frame; gold PNG untouched.'};img.onerror=()=>artStatus.textContent='Could not load Dragon PNG.';img.src='../CC90ED86-A87C-47AA-AB0E-B66013E98C8F.png';
+// Use the iOS-compatible touch and mouse tilt controls approved on Standard Phoenix.
+const card=document.getElementById('card');
+const stage=document.getElementById('stage');
+const vertical=document.getElementById('vertical');
+const horizontal=document.getElementById('horizontal');
+const readout=document.getElementById('tilt-status');
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+function renderTilt(){
+ const x=Number(horizontal.value),y=Number(vertical.value);
+ card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
+ readout.textContent='Tilt: '+x+'° horizontal / '+y+'° vertical';
+}
+function setTiltFromPosition(clientX,clientY){
+ const rect=stage.getBoundingClientRect();
+ const cx=rect.left+card.offsetLeft+card.offsetWidth/2;
+ const cy=rect.top+card.offsetTop+card.offsetHeight/2;
+ horizontal.value=String(Math.round(clamp(((clientX-cx)/(card.offsetWidth/2))*22,-22,22)));
+ vertical.value=String(Math.round(clamp(-((clientY-cy)/(card.offsetHeight/2))*22,-22,22)));
+ renderTilt();
+}
+vertical.addEventListener('input',renderTilt);
+horizontal.addEventListener('input',renderTilt);
+document.getElementById('reset').addEventListener('click',()=>{vertical.value='0';horizontal.value='0';renderTilt();});
+let mouseDragging=false;
+stage.addEventListener('pointerdown',e=>{
+ if(e.pointerType==='touch')return;
+ mouseDragging=true;
+ try{stage.setPointerCapture(e.pointerId)}catch(_){}
+ setTiltFromPosition(e.clientX,e.clientY);
+});
+stage.addEventListener('pointermove',e=>{if(mouseDragging)setTiltFromPosition(e.clientX,e.clientY);});
+for(const t of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(t,()=>{mouseDragging=false;});
+let activeTouch=null;
+stage.addEventListener('touchstart',e=>{
+ if(activeTouch!==null||!e.changedTouches.length)return;
+ const touch=e.changedTouches[0];
+ activeTouch=touch.identifier;
+ if(e.cancelable)e.preventDefault();
+ setTiltFromPosition(touch.clientX,touch.clientY);
+},{passive:false});
+stage.addEventListener('touchmove',e=>{
+ if(activeTouch===null)return;
+ for(const touch of e.changedTouches){
+  if(touch.identifier===activeTouch){
+   if(e.cancelable)e.preventDefault();
+   setTiltFromPosition(touch.clientX,touch.clientY);
+   break;
+  }
+ }
+},{passive:false});
+function endTouch(e){if(activeTouch===null)return;for(const t of e.changedTouches){if(t.identifier===activeTouch){activeTouch=null;break;}}}
+stage.addEventListener('touchend',endTouch,{passive:true});
+stage.addEventListener('touchcancel',endTouch,{passive:true});
+renderTilt();
+</script>
+</body></html>
