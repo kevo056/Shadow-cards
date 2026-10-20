@@ -26,14 +26,14 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
 .gold-shine::before{content:"";position:absolute;inset:0;background:
  linear-gradient(var(--gold-angle,125deg),transparent 3%,rgba(255,205,78,.09) 21%,rgba(255,242,164,.30) 39%,rgba(255,255,231,.52) 50%,rgba(255,224,116,.25) 61%,transparent 87%),
  repeating-linear-gradient(135deg,transparent 0%,rgba(255,236,161,.09) 8%,transparent 13%);opacity:.8}
-.gold-shine::after{content:"";position:absolute;top:-22%;left:-45%;width:37%;height:144%;
- background:linear-gradient(90deg,transparent,rgba(255,214,102,.05) 19%,rgba(255,244,181,.40) 38%,rgba(255,255,242,.84) 50%,rgba(255,228,132,.36) 64%,transparent 87%);
- transform:translate3d(0,0,0) skewX(-13deg);animation:kraken-gold-sweep 6.4s ease-in-out infinite;will-change:transform,opacity}
-@keyframes kraken-gold-sweep{0%,12%{transform:translate3d(0,0,0) skewX(-13deg);opacity:0}20%{opacity:1}65%{opacity:1}77%,100%{transform:translate3d(440%,0,0) skewX(-13deg);opacity:0}}
-@media(prefers-reduced-motion:reduce){.gold-shine::after{animation:none;opacity:0}}
+.gold-shine::after{content:"";position:absolute;inset:-20% -32%;pointer-events:none;
+ background:linear-gradient(90deg,transparent 33%,rgba(255,217,108,.09) 41%,rgba(255,244,190,.46) 47%,rgba(255,255,242,.85) 50%,rgba(255,228,134,.38) 53%,transparent 61%);
+ transform:translate3d(var(--shine-shift,0%),0,0) skewX(-12deg);
+ opacity:var(--shine-strength,.35);transition:transform 80ms linear,opacity 80ms linear;will-change:transform,opacity}
+@media(prefers-reduced-motion:reduce){.gold-shine::after{transition:none}}
 </style></head><body><main class="wrap">
 <h1>Kraken • Gold Shine Preview</h1>
-<p>Approved Kraken artwork • Original gold trim • Interactive tilt • Amethyst gems • Gold-frame shine only • No holographic artwork effects</p>
+<p>Approved Kraken artwork • Original gold trim • Interactive tilt • Amethyst gems • Tilt-controlled gold shine only • No holographic artwork effects</p>
 <div class="stage" id="stage"><div class="card" id="card">
 <img class="art" src="../F5AF6DCB-0971-477D-ACC4-B38A005A8F50.png" alt="Approved pure-black eight-tentacle Kraken over a sunken ship graveyard">
 <div class="bottom-black" aria-hidden="true"></div>
@@ -64,6 +64,8 @@ function renderTilt(){
  const x=Number(horizontal.value),y=Number(vertical.value);
  card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
  card.style.setProperty('--gold-angle',(125+x*2-y*1.3)+'deg');
+ card.style.setProperty('--shine-shift',((x*1.3)+(y*.45))+'%');
+ card.style.setProperty('--shine-strength',String(.32+Math.min(.55,(Math.abs(x)+Math.abs(y))*.013)));
  readout.textContent='Tilt: '+x+'° horizontal / '+y+'° vertical';
 }
 function setTiltFromPosition(clientX,clientY){
