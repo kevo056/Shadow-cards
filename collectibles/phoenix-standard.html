@@ -6,8 +6,8 @@
 body{margin:0;min-height:100dvh;background:radial-gradient(circle at 50% 18%,#49351b,#0e0d10 78%);color:#f7e9c7;font:16px system-ui,sans-serif;display:grid;place-items:center}
 .wrap{width:min(100%,540px);padding:18px 16px;text-align:center}
 h1{font-size:22px;margin:0 0 8px}p{font-size:13px;color:#d9c9ad}
-.stage{padding:22px 0}
-.card{position:relative;margin:auto;width:min(82vw,355px);aspect-ratio:2/3;overflow:hidden;border-radius:14px;background:#000;isolation:isolate;box-shadow:0 25px 40px #0009}
+.stage{perspective:900px;padding:22px 0;touch-action:none}
+.card{position:relative;margin:auto;width:min(82vw,355px);aspect-ratio:2/3;overflow:hidden;border-radius:14px;background:#000;isolation:isolate;box-shadow:0 25px 40px #0009;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));will-change:transform;touch-action:none}
 .card img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
 .art{z-index:1;clip-path:inset(4.15% round 9px)}
 .bottom-black{position:absolute;z-index:2;inset:92.1% 0 0;background:#000;pointer-events:none}
@@ -15,13 +15,66 @@ h1{font-size:22px;margin:0 0 8px}p{font-size:13px;color:#d9c9ad}
 .gem{position:absolute;z-index:5;left:50%;top:3.5969%;width:6.15%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 34% 25%,#fffbd3 0%,#ffe968 16%,#e6a914 43%,#96600a 72%,#422904 100%);box-shadow:inset 0 0 2px 1px #62400a,0 0 4px #ffe17a;pointer-events:none}
 .gem:before{content:'';position:absolute;inset:14%;background:linear-gradient(140deg,#fff6ba 0 25%,#f6cc37 26% 48%,#b7790d 49% 74%,#ffec76 75%);clip-path:polygon(50% 0,90% 30%,80% 76%,50% 100%,18% 72%,10% 28%);opacity:.92}
 .gem.bottom{top:92.60%;width:6.65%}
+.controls{max-width:340px;margin:12px auto;text-align:left}
+.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}
+.controls input{width:65%;accent-color:#cfa454}
+button{background:#241c13;border:1px solid #bd9653;border-radius:8px;color:#f7e9c7;padding:9px 18px}
 </style></head><body><main class="wrap">
 <h1>Phoenix • Standard</h1>
 <p>Approved Phoenix artwork • Gold trim and gemstones • No animated effects</p>
-<div class="stage"><div class="card">
+<div class="stage" id="stage"><div class="card" id="card">
 <img class="art" src="../Shadow%20Phoenix%20Over%20the%20Golden%20City%20(1).png" alt="Solid black Phoenix over the Golden City">
 <div class="bottom-black" aria-hidden="true"></div>
 <img class="frame" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png" alt="Original gold card frame">
 <div class="gem top" aria-label="Top golden gemstone"></div>
 <div class="gem bottom" aria-label="Bottom golden gemstone"></div>
-</div></div></main></body></html>
+</div></div>
+<div class="controls">
+<label for="vertical">Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label>
+<label for="horizontal">Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label>
+</div>
+<button id="reset">Reset tilt</button>
+</main>
+<script>
+'use strict';
+// Same tilt and touch controls as the approved holographic Phoenix,
+// with no foil, glint, particle, or rainbow effect layers.
+const card=document.getElementById('card');
+const stage=document.getElementById('stage');
+const vertical=document.getElementById('vertical');
+const horizontal=document.getElementById('horizontal');
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+let queued=false;
+function renderTilt(){
+  queued=false;
+  const x=Number(horizontal.value),y=Number(vertical.value);
+  card.style.setProperty('--rx',y+'deg');
+  card.style.setProperty('--ry',x+'deg');
+}
+function queueTilt(){
+  if(queued)return;
+  queued=true;
+  requestAnimationFrame(renderTilt);
+}
+vertical.addEventListener('input',queueTilt);
+horizontal.addEventListener('input',queueTilt);
+document.getElementById('reset').addEventListener('click',()=>{
+  vertical.value=0;horizontal.value=0;queueTilt();
+});
+let dragging=false;
+stage.addEventListener('pointerdown',e=>{
+  dragging=true;
+  stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const r=card.getBoundingClientRect();
+  horizontal.value=Math.round(clamp(((e.clientX-r.left)/r.width-.5)*44,-22,22));
+  vertical.value=Math.round(clamp((.5-(e.clientY-r.top)/r.height)*44,-22,22));
+  queueTilt();
+});
+for(const type of ['pointerup','pointercancel','lostpointercapture']){
+  stage.addEventListener(type,()=>{dragging=false;});
+}
+renderTilt();
+</script></body></html>
