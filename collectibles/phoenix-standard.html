@@ -6,8 +6,8 @@
 body{margin:0;min-height:100dvh;background:radial-gradient(circle at 50% 18%,#49351b,#0e0d10 78%);color:#f7e9c7;font:16px system-ui,sans-serif;display:grid;place-items:center}
 .wrap{width:min(100%,540px);padding:18px 16px;text-align:center}
 h1{font-size:22px;margin:0 0 8px}p{font-size:13px;color:#d9c9ad}
-.stage{perspective:900px;padding:22px 0;touch-action:none}
-.card{position:relative;margin:auto;width:min(82vw,355px);aspect-ratio:2/3;overflow:hidden;border-radius:14px;background:#000;isolation:isolate;box-shadow:0 25px 40px #0009;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));will-change:transform;touch-action:none}
+.stage{position:relative;perspective:650px;padding:22px 0;touch-action:none;user-select:none;-webkit-user-select:none}
+.card{position:relative;margin:auto;width:min(82vw,355px);aspect-ratio:2/3;overflow:hidden;border-radius:14px;background:#000;isolation:isolate;box-shadow:0 25px 40px #0009;transform:rotateX(0deg) rotateY(0deg);transform-style:preserve-3d;will-change:transform;touch-action:none}
 .card img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
 .art{z-index:1;clip-path:inset(4.15% round 9px)}
 .bottom-black{position:absolute;z-index:2;inset:92.1% 0 0;background:#000;pointer-events:none}
@@ -34,47 +34,78 @@ button{background:#241c13;border:1px solid #bd9653;border-radius:8px;color:#f7e9
 <label for="horizontal">Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label>
 </div>
 <button id="reset">Reset tilt</button>
+<p id="tilt-status" aria-live="off" style="font-size:12px">Tilt: 0° horizontal / 0° vertical</p>
 </main>
 <script>
 'use strict';
-// Same tilt and touch controls as the approved holographic Phoenix,
-// with no foil, glint, particle, or rainbow effect layers.
+// Reliable iOS touch dragging + mouse/pointer fallback.
+// Card position is measured from its untransformed layout box to avoid
+// feedback/jitter while rotating. The approved artwork/frame/gems are unchanged.
 const card=document.getElementById('card');
 const stage=document.getElementById('stage');
 const vertical=document.getElementById('vertical');
 const horizontal=document.getElementById('horizontal');
+const readout=document.getElementById('tilt-status');
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
-let queued=false;
 function renderTilt(){
-  queued=false;
-  const x=Number(horizontal.value),y=Number(vertical.value);
-  card.style.setProperty('--rx',y+'deg');
-  card.style.setProperty('--ry',x+'deg');
+ const x=Number(horizontal.value),y=Number(vertical.value);
+ card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
+ readout.textContent='Tilt: '+x+'° horizontal / '+y+'° vertical';
 }
-function queueTilt(){
-  if(queued)return;
-  queued=true;
-  requestAnimationFrame(renderTilt);
+function setTiltFromPosition(clientX,clientY){
+ const stageRect=stage.getBoundingClientRect();
+ const cx=stageRect.left+card.offsetLeft+card.offsetWidth/2;
+ const cy=stageRect.top+card.offsetTop+card.offsetHeight/2;
+ const dx=(clientX-cx)/(card.offsetWidth/2);
+ const dy=(clientY-cy)/(card.offsetHeight/2);
+ horizontal.value=String(Math.round(clamp(dx*22,-22,22)));
+ vertical.value=String(Math.round(clamp(-dy*22,-22,22)));
+ renderTilt();
 }
-vertical.addEventListener('input',queueTilt);
-horizontal.addEventListener('input',queueTilt);
+vertical.addEventListener('input',renderTilt);
+horizontal.addEventListener('input',renderTilt);
 document.getElementById('reset').addEventListener('click',()=>{
-  vertical.value=0;horizontal.value=0;queueTilt();
+ vertical.value='0';horizontal.value='0';renderTilt();
 });
-let dragging=false;
+let mouseDragging=false;
 stage.addEventListener('pointerdown',e=>{
-  dragging=true;
-  stage.setPointerCapture(e.pointerId);
+ if(e.pointerType==='touch')return;
+ mouseDragging=true;
+ try{stage.setPointerCapture(e.pointerId)}catch(_){}
+ setTiltFromPosition(e.clientX,e.clientY);
 });
 stage.addEventListener('pointermove',e=>{
-  if(!dragging)return;
-  const r=card.getBoundingClientRect();
-  horizontal.value=Math.round(clamp(((e.clientX-r.left)/r.width-.5)*44,-22,22));
-  vertical.value=Math.round(clamp((.5-(e.clientY-r.top)/r.height)*44,-22,22));
-  queueTilt();
+ if(!mouseDragging)return;
+ setTiltFromPosition(e.clientX,e.clientY);
 });
-for(const type of ['pointerup','pointercancel','lostpointercapture']){
-  stage.addEventListener(type,()=>{dragging=false;});
+for(const t of ['pointerup','pointercancel','lostpointercapture']){
+ stage.addEventListener(t,()=>{mouseDragging=false;});
 }
+let activeTouch=null;
+stage.addEventListener('touchstart',e=>{
+ if(activeTouch!==null||!e.changedTouches.length)return;
+ const touch=e.changedTouches[0];
+ activeTouch=touch.identifier;
+ if(e.cancelable)e.preventDefault();
+ setTiltFromPosition(touch.clientX,touch.clientY);
+},{passive:false});
+stage.addEventListener('touchmove',e=>{
+ if(activeTouch===null)return;
+ for(const touch of e.changedTouches){
+  if(touch.identifier===activeTouch){
+   if(e.cancelable)e.preventDefault();
+   setTiltFromPosition(touch.clientX,touch.clientY);
+   break;
+  }
+ }
+},{passive:false});
+function endTouch(e){
+ if(activeTouch===null)return;
+ for(const t of e.changedTouches){
+  if(t.identifier===activeTouch){activeTouch=null;break;}
+ }
+}
+stage.addEventListener('touchend',endTouch,{passive:true});
+stage.addEventListener('touchcancel',endTouch,{passive:true});
 renderTilt();
 </script></body></html>
