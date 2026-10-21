@@ -109,6 +109,46 @@ const vertical=document.getElementById('vertical');
 const horizontal=document.getElementById('horizontal');
 const readout=document.getElementById('tilt-status');
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+/* Draw the light as a soft, curved reflective ribbon that follows tilt.
+   It never runs on a timer and never changes when the card is left alone.
+   The existing background-only mask is applied to the containing layer,
+   excluding the pure-black Griffin and its edges. */
+const waveCanvas=document.getElementById('wave-reflection');
+const waveContext=waveCanvas.getContext('2d',{alpha:true});
+function drawTiltWave(tiltX,tiltY){
+ if(!waveContext)return;
+ const w=waveCanvas.width,h=waveCanvas.height;
+ const pixels=waveContext.createImageData(w,h),p=pixels.data;
+ const xTilt=tiltX/22,yTilt=tiltY/22;
+ // At neutral tilt the crest enters from the left, rather than radiating
+ // from the card center. Tilting sweeps it across the sky in a curved wave.
+ const travel=.20 + .62*xTilt;
+ const phase=.75*yTilt;
+ for(let y=0;y<h;y++){
+  const v=y/(h-1);
+  const curve=.095*Math.sin(v*Math.PI*2.15+phase)
+   +.045*Math.sin(v*Math.PI*4.0-phase*.6)
+   +.085*(v-.5);
+  const center=travel+curve;
+  for(let x=0;x<w;x++){
+   const u=x/(w-1),d=(u-center);
+   const core=Math.exp(-Math.pow(d/.055,2)*1.6);
+   const halo=Math.exp(-Math.pow(d/.145,2)*1.1);
+   const left=Math.exp(-Math.pow((d+.082)/.065,2));
+   const right=Math.exp(-Math.pow((d-.087)/.07,2));
+   const i=(y*w+x)*4;
+   // Colored diffraction along the two sides; the center is pearlescent,
+   // not an overbright white streak.
+   const energy=core*.49+halo*.19+left*.16+right*.15;
+   p[i]=Math.min(255,Math.round((205*core+91*left+225*right+124*halo)/Math.max(.001,core+left+right+halo)));
+   p[i+1]=Math.min(255,Math.round((224*core+211*left+128*right+166*halo)/Math.max(.001,core+left+right+halo)));
+   p[i+2]=Math.min(255,Math.round((247*core+226*left+242*right+237*halo)/Math.max(.001,core+left+right+halo)));
+   p[i+3]=Math.round(115*Math.min(1,energy));
+  }
+ }
+ waveContext.putImageData(pixels,0,0);
+}
+
 function renderTilt(){
  const x=Number(horizontal.value),y=Number(vertical.value);
  card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
@@ -269,44 +309,5 @@ renderTilt();
  art.addEventListener('error',()=>{holo.style.display='none';sweep.style.display='none'},{once:true});
 })();
 
-/* Draw the light as a soft, curved reflective ribbon that follows tilt.
-   It never runs on a timer and never changes when the card is left alone.
-   The existing background-only mask is applied to the containing layer,
-   excluding the pure-black Griffin and its edges. */
-const waveCanvas=document.getElementById('wave-reflection');
-const waveContext=waveCanvas.getContext('2d',{alpha:true});
-function drawTiltWave(tiltX,tiltY){
- if(!waveContext)return;
- const w=waveCanvas.width,h=waveCanvas.height;
- const pixels=waveContext.createImageData(w,h),p=pixels.data;
- const xTilt=tiltX/22,yTilt=tiltY/22;
- // At neutral tilt the crest enters from the left, rather than radiating
- // from the card center. Tilting sweeps it across the sky in a curved wave.
- const travel=.20 + .62*xTilt;
- const phase=.75*yTilt;
- for(let y=0;y<h;y++){
-  const v=y/(h-1);
-  const curve=.095*Math.sin(v*Math.PI*2.15+phase)
-   +.045*Math.sin(v*Math.PI*4.0-phase*.6)
-   +.085*(v-.5);
-  const center=travel+curve;
-  for(let x=0;x<w;x++){
-   const u=x/(w-1),d=(u-center);
-   const core=Math.exp(-Math.pow(d/.055,2)*1.6);
-   const halo=Math.exp(-Math.pow(d/.145,2)*1.1);
-   const left=Math.exp(-Math.pow((d+.082)/.065,2));
-   const right=Math.exp(-Math.pow((d-.087)/.07,2));
-   const i=(y*w+x)*4;
-   // Colored diffraction along the two sides; the center is pearlescent,
-   // not an overbright white streak.
-   const energy=core*.49+halo*.19+left*.16+right*.15;
-   p[i]=Math.min(255,Math.round((205*core+91*left+225*right+124*halo)/Math.max(.001,core+left+right+halo)));
-   p[i+1]=Math.min(255,Math.round((224*core+211*left+128*right+166*halo)/Math.max(.001,core+left+right+halo)));
-   p[i+2]=Math.min(255,Math.round((247*core+226*left+242*right+237*halo)/Math.max(.001,core+left+right+halo)));
-   p[i+3]=Math.round(115*Math.min(1,energy));
-  }
- }
- waveContext.putImageData(pixels,0,0);
-}
 
 </script></body></html>
