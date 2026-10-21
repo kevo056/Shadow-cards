@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Griffin • Holographic Orbs & Shine v6 | Story Forge</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(circle at 50% 18%,#24538b,#060c1d 78%);color:#e0f0ff;font:16px system-ui,sans-serif;display:grid;place-items:center}
+.wrap{width:min(100%,540px);padding:18px 16px;text-align:center}
+h1{font-size:22px;margin:0 0 8px}p{font-size:13px;color:#aac9e9}
+.stage{position:relative;perspective:650px;padding:22px 0;touch-action:none;user-select:none;-webkit-user-select:none}
+.card{position:relative;margin:auto;width:min(82vw,355px);aspect-ratio:2/3;overflow:hidden;border-radius:14px;background:#000;isolation:isolate;box-shadow:0 25px 40px #0009;transform:rotateX(0deg) rotateY(0deg);transform-style:preserve-3d;will-change:transform;touch-action:none}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.art{z-index:1;clip-path:inset(4.15% round 9px)}
+.bottom-black{position:absolute;z-index:2;inset:92.1% 0 0;background:#000;pointer-events:none}
+.frame{z-index:3;filter:brightness(1.08) drop-shadow(0 0 1.2px rgba(255,209,100,.55))}
+.gem{position:absolute;z-index:5;left:50%;top:3.5969%;width:5.4%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 34% 25%,#fffbd3 0%,#ffe968 16%,#e6a914 43%,#96600a 72%,#422904 100%);box-shadow:inset 0 0 2px 1px #62400a,0 0 5px 1px #ffe17a,0 0 10px #b88326;pointer-events:none}
+.gem:before{content:'';position:absolute;inset:14%;background:linear-gradient(140deg,#fff6ba 0 25%,#f6cc37 26% 48%,#b7790d 49% 74%,#ffec76 75%);clip-path:polygon(50% 0,90% 30%,80% 76%,50% 100%,18% 72%,10% 28%);opacity:.92}
+.gem.bottom{top:92.60%;width:5.7%}
+.controls{max-width:340px;margin:12px auto;text-align:left}
+.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}
+.controls input{width:65%;accent-color:#cfa454}
+button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9c7;padding:9px 18px}
+
+/* Frame-only metallic shine; the mask is extracted once from the original gold PNG. */
+.gold-shine{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden;opacity:0;mix-blend-mode:screen;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+.gold-shine.ready{opacity:1}
+.gold-shine::before{content:"";position:absolute;inset:0;
+ background:linear-gradient(var(--gold-angle,125deg),
+ transparent 4%,rgba(255,208,88,.18) 18%,rgba(255,239,159,.43) 32%,
+ rgba(255,255,234,.80) 42%,rgba(255,247,190,.46) 51%,transparent 66%),
+ repeating-linear-gradient(132deg,transparent 0 11%,rgba(255,239,178,.18) 11.4%,transparent 12.2% 22%);
+ opacity:var(--gold-intensity,.70)}
+.gold-shine::after{content:"";position:absolute;inset:0;
+ background:
+ linear-gradient(115deg,transparent 34%,rgba(255,229,137,.20) 39%,rgba(255,255,233,.98) 45%,rgba(255,242,165,.72) 48%,transparent 55%),
+ linear-gradient(24deg,transparent 38%,rgba(255,241,182,.28) 45%,rgba(255,255,245,.93) 49%,transparent 55%);
+ background-size:210% 210%,180% 180%;
+ background-position:var(--shine-x,50%) var(--shine-y,50%),var(--shine-x2,50%) var(--shine-y2,50%);
+ opacity:var(--shine-strength,.78);
+ transition:background-position 70ms linear,opacity 70ms linear}
+@media(prefers-reduced-motion:reduce){.gold-shine::after{transition:none}}
+
+/* Chromatic foil changes the sky's hue without raising its luminance.
+   Shares the exact Griffin-protection mask with the other sky-only effects. */
+.sky-chroma{position:absolute;inset:0;z-index:2;pointer-events:none;
+ clip-path:inset(4.15% round 9px);visibility:hidden;opacity:0;
+ mix-blend-mode:color;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ -webkit-mask-size:100% 100%;mask-size:100% 100%;
+ background:
+ linear-gradient(var(--chroma-angle,130deg),
+ #08b9ad 0%,#20a8d8 13%,#6a58d6 27%,#ca55bd 41%,
+ #dd81a4 50%,#b98b50 59%,#3bbcae 72%,#7552cf 86%,#cf69bb 100%);
+ background-size:185% 185%;
+ background-position:var(--chroma-x,50%) var(--chroma-y,50%);
+ transition:background-position 90ms linear}
+.card.ocean-ready .sky-chroma{visibility:visible;opacity:.23}
+@media(prefers-reduced-motion:reduce){.sky-chroma{transition:none}}
+
+/* Griffin holographic preview: only the nonblack sky background receives foil.
+   Both effect layers are disabled until the pixel mask is successfully built. */
+.ocean-holo,.ocean-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;mix-blend-mode:screen;opacity:0;visibility:hidden;clip-path:inset(4.15% round 9px);
+ -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+.card.ocean-ready .ocean-holo,.card.ocean-ready .ocean-sweep{opacity:1;visibility:visible}
+.ocean-holo{background:
+ linear-gradient(var(--ocean-angle,118deg),
+ transparent 4%,rgba(66,215,255,.08) 15%,rgba(87,220,255,.42) 24%,
+ rgba(121,91,235,.50) 32%,rgba(234,91,186,.46) 38%,
+ rgba(52,193,163,.28) 44%,transparent 52%,
+ rgba(220,167,73,.16) 61%,rgba(128,84,228,.42) 69%,
+ rgba(236,107,182,.36) 74%,transparent 84%),
+ repeating-linear-gradient(calc(var(--ocean-angle,118deg) + 47deg),
+ transparent 0%,transparent 8.6%,rgba(139,248,255,.16) 8.9%,
+ rgba(252,170,255,.18) 9.1%,transparent 9.4%,transparent 18%);
+ opacity:0}
+.card.ocean-ready .ocean-holo{opacity:.43}
+/* The reflection is a curved wave, NOT a straight band or timed animation.
+   Drawn only when the user tilts; no automatic movement. */
+.ocean-sweep{opacity:0}
+.card.ocean-ready .ocean-sweep{opacity:.42}
+.ocean-sweep canvas{display:block;width:100%;height:100%}
+
+/* Restrained glimmer particles and a separate passing glint.
+   They share the exact same scenery-only mask as the holographic sky,
+   so no light can touch the black Griffin silhouette. */
+.sky-particles,.sky-pass{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;
+ clip-path:inset(4.15% round 9px);visibility:hidden;opacity:0;mix-blend-mode:screen;
+ -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+.card.ocean-ready .sky-particles{visibility:visible;opacity:.78}
+.card.ocean-ready .sky-pass{visibility:visible;opacity:.62}
+.sky-particles i{position:absolute;display:block;left:var(--x);top:var(--y);width:var(--s);height:var(--s);
+ opacity:0;animation-duration:var(--t);animation-delay:var(--delay);animation-iteration-count:infinite;
+ animation-timing-function:ease-in-out;will-change:transform,opacity}
+.sky-particles .orb{border-radius:50%;background:radial-gradient(circle at 38% 34%,
+ rgba(255,255,255,.90),rgba(172,240,255,.75) 18%,rgba(95,189,247,.43) 39%,
+ rgba(168,123,245,.17) 63%,transparent 93%);animation-name:sky-orb-float}
+.sky-particles .orb.rose{background:radial-gradient(circle at 38% 34%,
+ rgba(255,255,255,.87),rgba(246,200,250,.70) 18%,rgba(192,130,232,.43) 41%,
+ rgba(109,178,243,.15) 67%,transparent 93%)}
+.sky-particles .star{background:radial-gradient(circle,rgba(255,255,255,.88) 0 8%,
+ rgba(190,238,255,.70) 12% 18%,rgba(144,176,246,.10) 37%,transparent 76%);
+ animation-name:sky-star-twinkle}
+.sky-particles .star:before,.sky-particles .star:after{content:"";position:absolute;display:block;
+ background:linear-gradient(90deg,transparent,rgba(223,241,255,.10) 22%,rgba(255,255,255,.77) 50%,rgba(220,189,255,.12) 78%,transparent)}
+.sky-particles .star:before{left:0;right:0;top:47%;height:6%}
+.sky-particles .star:after{top:0;bottom:0;left:47%;width:6%;background:linear-gradient(180deg,
+ transparent,rgba(223,241,255,.10) 22%,rgba(255,255,255,.77) 50%,rgba(220,189,255,.12) 78%,transparent)}
+@keyframes sky-orb-float{
+ 0%{transform:translate3d(0,9px,0) scale(.75);opacity:0}
+ 25%{opacity:.48}60%{opacity:.52}85%{opacity:.22}
+ 100%{transform:translate3d(var(--dx,7px),-23px,0) scale(1.06);opacity:0}}
+@keyframes sky-star-twinkle{
+ 0%,15%{transform:scale(.65);opacity:0}
+ 32%{transform:scale(1.03);opacity:.64}53%{opacity:.12}70%{opacity:.48}
+ 100%{transform:scale(.68);opacity:0}}
+.sky-pass::before{content:"";position:absolute;top:-24%;left:-56%;width:38%;height:148%;
+ background:linear-gradient(90deg,transparent 0%,rgba(118,211,250,.02) 18%,
+ rgba(135,211,243,.14) 34%,rgba(239,231,252,.35) 49%,
+ rgba(214,162,246,.15) 65%,transparent 100%);
+ transform:translate3d(0,0,0) skewX(-12deg);
+ animation:sky-shine-pass 8.6s ease-in-out infinite;will-change:transform,opacity}
+@keyframes sky-shine-pass{
+ 0%,16%{transform:translate3d(0,0,0) skewX(-12deg);opacity:0}
+ 27%{opacity:.74}61%{opacity:.74}
+ 78%,100%{transform:translate3d(480%,0,0) skewX(-12deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){
+ .sky-pass::before{animation:none;opacity:0}
+ .sky-particles i{animation:none;will-change:auto}
+ .sky-particles .orb{opacity:.17}.sky-particles .star{opacity:.12}
+}
+</style></head><body><main class="wrap">
+<h1>Griffin • Holographic Orbs & Shine v6</h1>
+<p>Approved Griffin artwork • Original gold trim • Gold gemstones • Interactive tilt • Soft tilt-controlled wave • Floating orbs and sparkles • Gentle passing shine • Protected black Griffin</p>
+<div class="stage" id="stage"><div class="card" id="card">
+<img class="art" id="griffin-art" src="../A2ED838B-6817-4C7A-93F3-E0B84412A255.png" alt="Approved pure-black flying Griffin silhouette over blue skies, clouds and illustrated birds">
+<div class="sky-chroma" id="sky-chroma" aria-hidden="true"></div>
+<div class="ocean-holo" id="ocean-holo" aria-hidden="true"></div>
+<div class="ocean-sweep" id="ocean-sweep" aria-hidden="true"><canvas id="wave-reflection" width="192" height="288"></canvas></div>
+<div class="sky-particles" id="sky-particles" aria-hidden="true">
+<i class="orb" style="--x:14%;--y:27%;--s:8px;--t:11.6s;--delay:-4s;--dx:6px"></i>
+<i class="orb rose" style="--x:28%;--y:42%;--s:7px;--t:13.1s;--delay:-8s;--dx:-5px"></i>
+<i class="orb" style="--x:47%;--y:20%;--s:7px;--t:12.4s;--delay:-2s;--dx:6px"></i>
+<i class="orb rose" style="--x:72%;--y:29%;--s:9px;--t:13.8s;--delay:-7s;--dx:-6px"></i>
+<i class="orb" style="--x:84%;--y:48%;--s:7px;--t:11.7s;--delay:-5s;--dx:7px"></i>
+<i class="orb" style="--x:18%;--y:62%;--s:8px;--t:12.9s;--delay:-9s;--dx:-5px"></i>
+<i class="orb rose" style="--x:62%;--y:67%;--s:7px;--t:14.3s;--delay:-3s;--dx:7px"></i>
+<i class="orb" style="--x:78%;--y:81%;--s:8px;--t:13.2s;--delay:-10s;--dx:-4px"></i>
+<i class="orb rose" style="--x:34%;--y:83%;--s:7px;--t:12.7s;--delay:-6s;--dx:5px"></i>
+<i class="orb" style="--x:56%;--y:53%;--s:6px;--t:15.1s;--delay:-11s;--dx:-5px"></i>
+<i class="star" style="--x:23%;--y:35%;--s:14px;--t:6.2s;--delay:-2s"></i>
+<i class="star" style="--x:76%;--y:21%;--s:13px;--t:6.9s;--delay:-5s"></i>
+<i class="star" style="--x:42%;--y:57%;--s:15px;--t:5.8s;--delay:-3.5s"></i>
+<i class="star" style="--x:83%;--y:70%;--s:13px;--t:7.2s;--delay:-4s"></i>
+<i class="star" style="--x:27%;--y:78%;--s:12px;--t:6.5s;--delay:-1.5s"></i>
+<i class="star" style="--x:62%;--y:39%;--s:14px;--t:6.1s;--delay:-4.8s"></i>
+</div>
+<div class="sky-pass" id="sky-pass" aria-hidden="true"></div>
+<div class="bottom-black" aria-hidden="true"></div>
+<img class="frame" id="frame-gold" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png" alt="Original gold card trim">
+<div class="gold-shine" id="gold-shine" aria-hidden="true"></div>
+<div class="gem top" role="img" aria-label="Top golden gemstone"></div>
+<div class="gem bottom" role="img" aria-label="Bottom golden gemstone"></div>
+</div></div>
+<div class="controls">
+<label for="vertical">Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label>
+<label for="horizontal">Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label>
+</div>
+<button id="reset">Reset tilt</button>
+<p id="tilt-status" aria-live="off" style="font-size:12px">Tilt: 0° horizontal / 0° vertical</p>
+</main>
+<script>
+'use strict';
+// Reliable iOS touch dragging + mouse/pointer fallback.
+// Card position is measured from its untransformed layout box to avoid
+// feedback/jitter while rotating. The approved Griffin artwork and original gold frame remain unchanged.
+const card=document.getElementById('card');
+const stage=document.getElementById('stage');
+const vertical=document.getElementById('vertical');
+const horizontal=document.getElementById('horizontal');
+const readout=document.getElementById('tilt-status');
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+/* Draw the light as a soft, curved reflective ribbon that follows tilt.
+   It never runs on a timer and never changes when the card is left alone.
+   The existing background-only mask is applied to the containing layer,
+   excluding the pure-black Griffin and its edges. */
+const waveCanvas=document.getElementById('wave-reflection');
+const waveContext=waveCanvas.getContext('2d',{alpha:true});
+function drawTiltWave(tiltX,tiltY){
+ if(!waveContext)return;
+ const w=waveCanvas.width,h=waveCanvas.height;
+ const pixels=waveContext.createImageData(w,h),p=pixels.data;
+ const xTilt=tiltX/22,yTilt=tiltY/22;
+ // At neutral tilt the crest enters from the left, rather than radiating
+ // from the card center. Tilting sweeps it across the sky in a curved wave.
+ const travel=.20 + .62*xTilt;
+ const phase=.75*yTilt;
+ for(let y=0;y<h;y++){
+  const v=y/(h-1);
+  const curve=.095*Math.sin(v*Math.PI*2.15+phase)
+   +.045*Math.sin(v*Math.PI*4.0-phase*.6)
+   +.085*(v-.5);
+  const center=travel+curve;
+  for(let x=0;x<w;x++){
+   const u=x/(w-1),d=(u-center);
+   const core=Math.exp(-Math.pow(d/.055,2)*1.6);
+   const halo=Math.exp(-Math.pow(d/.145,2)*1.1);
+   const left=Math.exp(-Math.pow((d+.082)/.065,2));
+   const right=Math.exp(-Math.pow((d-.087)/.07,2));
+   const i=(y*w+x)*4;
+   // Colored diffraction along the two sides; the center is pearlescent,
+   // not an overbright white streak.
+   const energy=core*.39+halo*.12+left*.13+right*.12;
+   p[i]=Math.min(255,Math.round((205*core+91*left+225*right+124*halo)/Math.max(.001,core+left+right+halo)));
+   p[i+1]=Math.min(255,Math.round((224*core+211*left+128*right+166*halo)/Math.max(.001,core+left+right+halo)));
+   p[i+2]=Math.min(255,Math.round((247*core+226*left+242*right+237*halo)/Math.max(.001,core+left+right+halo)));
+   p[i+3]=Math.round(84*Math.min(1,energy));
+  }
+ }
+ waveContext.putImageData(pixels,0,0);
+}
+
+function renderTilt(){
+ const x=Number(horizontal.value),y=Number(vertical.value);
+ card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
+ card.style.setProperty('--gold-angle',(125+x*2.8-y*1.6)+'deg');
+ card.style.setProperty('--ocean-angle',(118+x*3.1-y*2.3)+'deg');
+ card.style.setProperty('--chroma-angle',(130+x*3.7-y*2.8)+'deg');
+ card.style.setProperty('--chroma-x',(50+x*1.4)+'%');
+ card.style.setProperty('--chroma-y',(50-y*1.2)+'%');
+ card.style.setProperty('--gold-intensity',String(.65+Math.min(.3,(Math.abs(x)+Math.abs(y))*.009)));
+ card.style.setProperty('--shine-x',(50+x*2.15)+'%');
+ card.style.setProperty('--shine-y',(50-y*2.0)+'%');
+ card.style.setProperty('--shine-x2',(50-x*1.6)+'%');
+ card.style.setProperty('--shine-y2',(50+y*1.7)+'%');
+ card.style.setProperty('--shine-strength',String(.72+Math.min(.28,(Math.abs(x)+Math.abs(y))*.009)));
+ drawTiltWave(x,y);
+ readout.textContent='Tilt: '+x+'° horizontal / '+y+'° vertical';
+}
+function setTiltFromPosition(clientX,clientY){
+ const stageRect=stage.getBoundingClientRect();
+ const cx=stageRect.left+card.offsetLeft+card.offsetWidth/2;
+ const cy=stageRect.top+card.offsetTop+card.offsetHeight/2;
+ const dx=(clientX-cx)/(card.offsetWidth/2);
+ const dy=(clientY-cy)/(card.offsetHeight/2);
+ horizontal.value=String(Math.round(clamp(dx*22,-22,22)));
+ vertical.value=String(Math.round(clamp(-dy*22,-22,22)));
+ renderTilt();
+}
+vertical.addEventListener('input',renderTilt);
+horizontal.addEventListener('input',renderTilt);
+document.getElementById('reset').addEventListener('click',()=>{
+ vertical.value='0';horizontal.value='0';renderTilt();
+});
+let mouseDragging=false;
+stage.addEventListener('pointerdown',e=>{
+ if(e.pointerType==='touch')return;
+ mouseDragging=true;
+ try{stage.setPointerCapture(e.pointerId)}catch(_){}
+ setTiltFromPosition(e.clientX,e.clientY);
+});
+stage.addEventListener('pointermove',e=>{
+ if(!mouseDragging)return;
+ setTiltFromPosition(e.clientX,e.clientY);
+});
+for(const t of ['pointerup','pointercancel','lostpointercapture']){
+ stage.addEventListener(t,()=>{mouseDragging=false;});
+}
+let activeTouch=null;
+stage.addEventListener('touchstart',e=>{
+ if(activeTouch!==null||!e.changedTouches.length)return;
+ const touch=e.changedTouches[0];
+ activeTouch=touch.identifier;
+ if(e.cancelable)e.preventDefault();
+ setTiltFromPosition(touch.clientX,touch.clientY);
+},{passive:false});
+stage.addEventListener('touchmove',e=>{
+ if(activeTouch===null)return;
+ for(const touch of e.changedTouches){
+  if(touch.identifier===activeTouch){
+   if(e.cancelable)e.preventDefault();
+   setTiltFromPosition(touch.clientX,touch.clientY);
+   break;
+  }
+ }
+},{passive:false});
+function endTouch(e){
+ if(activeTouch===null)return;
+ for(const t of e.changedTouches){
+  if(t.identifier===activeTouch){activeTouch=null;break;}
+ }
+}
+stage.addEventListener('touchend',endTouch,{passive:true});
+stage.addEventListener('touchcancel',endTouch,{passive:true});
+renderTilt();
+
+/* Sample the actual frame once; never allow gold light onto the Griffin or the blue scene. */
+(function(){
+ const frame=document.getElementById('frame-gold');
+ const shine=document.getElementById('gold-shine');
+ function prepare(){
+  if(!frame.naturalWidth)return;
+  try{
+   const c=document.createElement('canvas');c.width=512;c.height=768;
+   const ctx=c.getContext('2d',{willReadFrequently:true});
+   ctx.drawImage(frame,0,0,c.width,c.height);
+   const img=ctx.getImageData(0,0,c.width,c.height),p=img.data,w=c.width,h=c.height;
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=(y*w+x)*4,r=p[i],g=p[i+1],b=p[i+2],a=p[i+3];
+    const perimeter=(x<w*.16||x>w*.84||y<h*.105||y>h*.895);
+    const golden=(r>70&&g>38&&r>g*1.10&&g>b*1.14&&r>b*1.34);
+    p[i]=p[i+1]=p[i+2]=255;
+    p[i+3]=perimeter&&golden&&a>10?Math.round(a*.93):0;
+   }
+   ctx.putImageData(img,0,0);
+   const url='url("'+c.toDataURL('image/png')+'")';
+   shine.style.webkitMaskImage=url;shine.style.maskImage=url;
+   shine.classList.add('ready');
+  }catch(err){shine.style.display='none';console.warn('Gold shine disabled because the frame mask was unavailable',err);}
+ }
+ if(frame.complete&&frame.naturalWidth)prepare();
+ else frame.addEventListener('load',prepare,{once:true});
+ frame.addEventListener('error',()=>{shine.style.display='none'},{once:true});
+})();
+
+
+/* Extract a background-only mask from the original approved Griffin PNG.
+   Near-black pixels and a 1-pixel halo around them are excluded.
+   The sky hologram and tilt-controlled wave reflection share this exact same stationary mask.
+   If reading the artwork fails, effects remain hidden rather than touching the Griffin. */
+(function(){
+ const art=document.getElementById('griffin-art');
+ const holo=document.getElementById('ocean-holo');
+ const chroma=document.getElementById('sky-chroma');
+ const sweep=document.getElementById('ocean-sweep');
+ const particles=document.getElementById('sky-particles');
+ const passing=document.getElementById('sky-pass');
+ function prepare(){
+  if(!art.naturalWidth)return;
+  try{
+   const w=512,h=768,c=document.createElement('canvas');
+   c.width=w;c.height=h;
+   const ctx=c.getContext('2d',{willReadFrequently:true});
+   ctx.drawImage(art,0,0,w,h);
+   const img=ctx.getImageData(0,0,w,h),p=img.data;
+   const black=new Uint8Array(w*h);
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=(y*w+x)*4,r=p[i],g=p[i+1],b=p[i+2];
+    const hi=Math.max(r,g,b);
+    black[y*w+x]=(hi<39)?1:0;
+   }
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=(y*w+x)*4,r=p[i],g=p[i+1],b=p[i+2],hi=Math.max(r,g,b),lo=Math.min(r,g,b);
+    const inside=x>w*.055&&x<w*.945&&y>h*.045&&y<h*.915;
+    // Do not allow even anti-aliased pixels immediately bordering the pure-black figure.
+    let touchesBlack=false;
+    if(inside&&hi<105){
+     for(let dy=-1;dy<=1&&!touchesBlack;dy++)for(let dx=-1;dx<=1;dx++){
+      const xx=x+dx,yy=y+dy;
+      if(xx>=0&&xx<w&&yy>=0&&yy<h&&black[yy*w+xx]){touchesBlack=true;break}
+     }
+    }
+    const scenery=Math.max(0,Math.min(1,(hi-56)/48));
+    const colored=Math.max(0,Math.min(1,(hi-lo-8)/25));
+    const amount=inside&&!touchesBlack?Math.round(235*scenery*(.45+.55*colored)):0;
+    p[i]=p[i+1]=p[i+2]=255;p[i+3]=amount;
+   }
+   ctx.putImageData(img,0,0);
+   const mask='url("'+c.toDataURL('image/png')+'")';
+   for(const layer of [chroma,holo,sweep,particles,passing]){
+    layer.style.webkitMaskImage=mask;layer.style.maskImage=mask;
+    layer.style.webkitMaskSize='100% 100%';layer.style.maskSize='100% 100%';
+   }
+   card.classList.add('ocean-ready');
+  }catch(err){
+   chroma.style.display='none';holo.style.display='none';sweep.style.display='none';particles.style.display='none';passing.style.display='none';
+   console.warn('Griffin silhouette protection mask unavailable: effects disabled',err);
+  }
+ }
+ if(art.complete&&art.naturalWidth)prepare();
+ else art.addEventListener('load',prepare,{once:true});
+ art.addEventListener('error',()=>{chroma.style.display='none';holo.style.display='none';sweep.style.display='none';particles.style.display='none';passing.style.display='none'},{once:true});
+})();
+
+
+</script></body></html>
