@@ -80,8 +80,8 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
 .ocean-sweep canvas{display:block;width:100%;height:100%}
 
 /* Restrained glimmer particles and a separate passing glint.
-   They share the exact same scenery-only mask as the holographic sky,
-   so no light can touch the black Basilisk silhouette. */
+   Particles use the scenery-only silhouette mask. The automatic passing glint
+   intentionally crosses the black Basilisk; all other foil remains excluded. */
 .sky-particles,.sky-pass{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;
  clip-path:inset(4.15% round 9px);visibility:hidden;opacity:0;mix-blend-mode:screen;
  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
@@ -330,10 +330,9 @@ renderTilt();
 })();
 
 
-/* Extract a background-only mask from the original approved Basilisk PNG.
-   Near-black pixels and a 1-pixel halo around them are excluded.
-   The sky hologram and tilt-controlled wave reflection share this exact same stationary mask.
-   If reading the artwork fails, effects remain hidden rather than touching the Basilisk. */
+/* Extract a background-only mask from the approved Basilisk PNG.
+   Near-black pixels and a 1-pixel halo are excluded from foil, wave and sparkles.
+   Only the automatic passing shine is permitted to cross the black silhouette. */
 (function(){
  const art=document.getElementById('basilisk-art');
  const holo=document.getElementById('ocean-holo');
@@ -373,7 +372,9 @@ renderTilt();
    }
    ctx.putImageData(img,0,0);
    const mask='url("'+c.toDataURL('image/png')+'")';
-   for(const layer of [chroma,holo,sweep,particles,passing]){
+   // The automatic passing shine alone is intentionally allowed over the solid-black Basilisk.
+   // Keep the foil, tilt wave, chroma and sparkles masked to the scenery.
+   for(const layer of [chroma,holo,sweep,particles]){
     layer.style.webkitMaskImage=mask;layer.style.maskImage=mask;
     layer.style.webkitMaskSize='100% 100%';layer.style.maskSize='100% 100%';
    }
