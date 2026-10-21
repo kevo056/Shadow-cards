@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kraken • Gold Shine v2 | Story Forge</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(circle at 50% 18%,#173f6e,#060c1d 78%);color:#e0f0ff;font:16px system-ui,sans-serif;display:grid;place-items:center}
+.wrap{width:min(100%,540px);padding:18px 16px;text-align:center}
+h1{font-size:22px;margin:0 0 8px}p{font-size:13px;color:#aac9e9}
+.stage{position:relative;perspective:650px;padding:22px 0;touch-action:none;user-select:none;-webkit-user-select:none}
+.card{position:relative;margin:auto;width:min(82vw,355px);aspect-ratio:2/3;overflow:hidden;border-radius:14px;background:#000;isolation:isolate;box-shadow:0 25px 40px #0009;transform:rotateX(0deg) rotateY(0deg);transform-style:preserve-3d;will-change:transform;touch-action:none}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.art{z-index:1;clip-path:inset(4.15% round 9px)}
+.bottom-black{position:absolute;z-index:2;inset:92.1% 0 0;background:#000;pointer-events:none}
+.frame{z-index:3}
+.gem{position:absolute;z-index:5;left:50%;top:3.5969%;width:5.4%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 34% 25%,#f4deff 0%,#bd8cff 17%,#8135d9 44%,#48117d 73%,#210836 100%);box-shadow:inset 0 0 2px 1px #310953,0 0 7px 2px #b77aff,0 0 13px #7132c9;pointer-events:none}
+.gem:before{content:'';position:absolute;inset:14%;background:linear-gradient(140deg,#f0cfff 0 25%,#b566f5 26% 48%,#59199a 49% 74%,#cf91ff 75%);clip-path:polygon(50% 0,90% 30%,80% 76%,50% 100%,18% 72%,10% 28%);opacity:.92}
+.gem.bottom{top:92.60%;width:5.7%}
+.controls{max-width:340px;margin:12px auto;text-align:left}
+.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}
+.controls input{width:65%;accent-color:#cfa454}
+button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9c7;padding:9px 18px}
+
+/* Frame-only metallic shine; the mask is extracted once from the original gold PNG. */
+.gold-shine{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden;opacity:0;mix-blend-mode:screen;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+.gold-shine.ready{opacity:1}
+.gold-shine::before{content:"";position:absolute;inset:0;
+ background:linear-gradient(var(--gold-angle,125deg),
+ transparent 4%,rgba(255,208,88,.18) 18%,rgba(255,239,159,.43) 32%,
+ rgba(255,255,234,.80) 42%,rgba(255,247,190,.46) 51%,transparent 66%),
+ repeating-linear-gradient(132deg,transparent 0 11%,rgba(255,239,178,.18) 11.4%,transparent 12.2% 22%);
+ opacity:var(--gold-intensity,.70)}
+.gold-shine::after{content:"";position:absolute;inset:0;
+ background:
+ linear-gradient(115deg,transparent 34%,rgba(255,229,137,.20) 39%,rgba(255,255,233,.98) 45%,rgba(255,242,165,.72) 48%,transparent 55%),
+ linear-gradient(24deg,transparent 38%,rgba(255,241,182,.28) 45%,rgba(255,255,245,.93) 49%,transparent 55%);
+ background-size:210% 210%,180% 180%;
+ background-position:var(--shine-x,50%) var(--shine-y,50%),var(--shine-x2,50%) var(--shine-y2,50%);
+ opacity:var(--shine-strength,.78);
+ transition:background-position 70ms linear,opacity 70ms linear}
+@media(prefers-reduced-motion:reduce){.gold-shine::after{transition:none}}
+</style></head><body><main class="wrap">
+<h1>Kraken • Gold Shine v2</h1>
+<p>Approved Kraken artwork • Original gold trim • Interactive tilt • Amethyst gems • Stronger tilt-controlled gold reflections • No holographic artwork effects</p>
+<div class="stage" id="stage"><div class="card" id="card">
+<img class="art" src="../F5AF6DCB-0971-477D-ACC4-B38A005A8F50.png" alt="Approved pure-black eight-tentacle Kraken over a sunken ship graveyard">
+<div class="bottom-black" aria-hidden="true"></div>
+<img class="frame" id="frame-gold" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png" alt="Original gold card trim">
+<div class="gold-shine" id="gold-shine" aria-hidden="true"></div>
+<div class="gem top" role="img" aria-label="Top purple amethyst gemstone"></div>
+<div class="gem bottom" role="img" aria-label="Bottom purple amethyst gemstone"></div>
+</div></div>
+<div class="controls">
+<label for="vertical">Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label>
+<label for="horizontal">Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label>
+</div>
+<button id="reset">Reset tilt</button>
+<p id="tilt-status" aria-live="off" style="font-size:12px">Tilt: 0° horizontal / 0° vertical</p>
+</main>
+<script>
+'use strict';
+// Reliable iOS touch dragging + mouse/pointer fallback.
+// Card position is measured from its untransformed layout box to avoid
+// feedback/jitter while rotating. The approved Kraken artwork and original gold frame remain unchanged.
+const card=document.getElementById('card');
+const stage=document.getElementById('stage');
+const vertical=document.getElementById('vertical');
+const horizontal=document.getElementById('horizontal');
+const readout=document.getElementById('tilt-status');
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+function renderTilt(){
+ const x=Number(horizontal.value),y=Number(vertical.value);
+ card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
+ card.style.setProperty('--gold-angle',(125+x*2.8-y*1.6)+'deg');
+ card.style.setProperty('--gold-intensity',String(.65+Math.min(.3,(Math.abs(x)+Math.abs(y))*.009)));
+ card.style.setProperty('--shine-x',(50+x*2.15)+'%');
+ card.style.setProperty('--shine-y',(50-y*2.0)+'%');
+ card.style.setProperty('--shine-x2',(50-x*1.6)+'%');
+ card.style.setProperty('--shine-y2',(50+y*1.7)+'%');
+ card.style.setProperty('--shine-strength',String(.72+Math.min(.28,(Math.abs(x)+Math.abs(y))*.009)));
+ readout.textContent='Tilt: '+x+'° horizontal / '+y+'° vertical';
+}
+function setTiltFromPosition(clientX,clientY){
+ const stageRect=stage.getBoundingClientRect();
+ const cx=stageRect.left+card.offsetLeft+card.offsetWidth/2;
+ const cy=stageRect.top+card.offsetTop+card.offsetHeight/2;
+ const dx=(clientX-cx)/(card.offsetWidth/2);
+ const dy=(clientY-cy)/(card.offsetHeight/2);
+ horizontal.value=String(Math.round(clamp(dx*22,-22,22)));
+ vertical.value=String(Math.round(clamp(-dy*22,-22,22)));
+ renderTilt();
+}
+vertical.addEventListener('input',renderTilt);
+horizontal.addEventListener('input',renderTilt);
+document.getElementById('reset').addEventListener('click',()=>{
+ vertical.value='0';horizontal.value='0';renderTilt();
+});
+let mouseDragging=false;
+stage.addEventListener('pointerdown',e=>{
+ if(e.pointerType==='touch')return;
+ mouseDragging=true;
+ try{stage.setPointerCapture(e.pointerId)}catch(_){}
+ setTiltFromPosition(e.clientX,e.clientY);
+});
+stage.addEventListener('pointermove',e=>{
+ if(!mouseDragging)return;
+ setTiltFromPosition(e.clientX,e.clientY);
+});
+for(const t of ['pointerup','pointercancel','lostpointercapture']){
+ stage.addEventListener(t,()=>{mouseDragging=false;});
+}
+let activeTouch=null;
+stage.addEventListener('touchstart',e=>{
+ if(activeTouch!==null||!e.changedTouches.length)return;
+ const touch=e.changedTouches[0];
+ activeTouch=touch.identifier;
+ if(e.cancelable)e.preventDefault();
+ setTiltFromPosition(touch.clientX,touch.clientY);
+},{passive:false});
+stage.addEventListener('touchmove',e=>{
+ if(activeTouch===null)return;
+ for(const touch of e.changedTouches){
+  if(touch.identifier===activeTouch){
+   if(e.cancelable)e.preventDefault();
+   setTiltFromPosition(touch.clientX,touch.clientY);
+   break;
+  }
+ }
+},{passive:false});
+function endTouch(e){
+ if(activeTouch===null)return;
+ for(const t of e.changedTouches){
+  if(t.identifier===activeTouch){activeTouch=null;break;}
+ }
+}
+stage.addEventListener('touchend',endTouch,{passive:true});
+stage.addEventListener('touchcancel',endTouch,{passive:true});
+renderTilt();
+
+/* Sample the actual frame once; never allow gold light onto the Kraken or the blue scene. */
+(function(){
+ const frame=document.getElementById('frame-gold');
+ const shine=document.getElementById('gold-shine');
+ function prepare(){
+  if(!frame.naturalWidth)return;
+  try{
+   const c=document.createElement('canvas');c.width=512;c.height=768;
+   const ctx=c.getContext('2d',{willReadFrequently:true});
+   ctx.drawImage(frame,0,0,c.width,c.height);
+   const img=ctx.getImageData(0,0,c.width,c.height),p=img.data,w=c.width,h=c.height;
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=(y*w+x)*4,r=p[i],g=p[i+1],b=p[i+2],a=p[i+3];
+    const perimeter=(x<w*.16||x>w*.84||y<h*.105||y>h*.895);
+    const golden=(r>70&&g>38&&r>g*1.10&&g>b*1.14&&r>b*1.34);
+    p[i]=p[i+1]=p[i+2]=255;
+    p[i+3]=perimeter&&golden&&a>10?Math.round(a*.93):0;
+   }
+   ctx.putImageData(img,0,0);
+   const url='url("'+c.toDataURL('image/png')+'")';
+   shine.style.webkitMaskImage=url;shine.style.maskImage=url;
+   shine.classList.add('ready');
+  }catch(err){shine.style.display='none';console.warn('Gold shine disabled because the frame mask was unavailable',err);}
+ }
+ if(frame.complete&&frame.naturalWidth)prepare();
+ else frame.addEventListener('load',prepare,{once:true});
+ frame.addEventListener('error',()=>{shine.style.display='none'},{once:true});
+})();
+
+</script></body></html>
