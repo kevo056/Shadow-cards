@@ -50,6 +50,16 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
 .card.ocean-ready .sky-chroma{visibility:visible;opacity:.66}
 .card.ocean-ready .ocean-sweep{visibility:visible;opacity:.70}
 @media(prefers-reduced-motion:reduce){.sky-chroma,.ocean-sweep{will-change:auto}}
+/* Quiet foil texture underneath the moving waves; no extra white brightness. */
+.ocean-holo{position:absolute;inset:0;z-index:2;pointer-events:none;
+ clip-path:inset(4.15% round 9px);visibility:hidden;opacity:0;
+ mix-blend-mode:color;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ -webkit-mask-size:100% 100%;mask-size:100% 100%;
+ background:repeating-linear-gradient(137deg,
+ rgba(62,193,177,.22) 0%,rgba(132,100,218,.24) 6%,
+ rgba(220,109,172,.21) 11%,rgba(62,193,177,.22) 18%);
+ background-size:180% 180%}
+.card.ocean-ready .ocean-holo{visibility:visible;opacity:.23}
 </style></head><body><main class="wrap">
 <h1>Griffin • Holographic Wave v3</h1>
 <p>Approved Griffin artwork • Original gold trim • Gold gemstones • Interactive tilt • Flowing iridescent sky waves with soft traveling highlights • Protected black Griffin</p>
