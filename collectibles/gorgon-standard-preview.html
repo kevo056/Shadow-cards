@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gorgon • Standard Preview | Story Forge</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(circle at 50% 18%,#23342b,#0a1510 78%);color:#e0f0ff;font:16px system-ui,sans-serif;display:grid;place-items:center}
+.wrap{width:min(100%,540px);padding:18px 16px;text-align:center}
+h1{font-size:22px;margin:0 0 8px}p{font-size:13px;color:#aac9e9}
+.stage{position:relative;perspective:650px;padding:22px 0;touch-action:none;user-select:none;-webkit-user-select:none}
+.card{position:relative;margin:auto;width:min(82vw,355px);aspect-ratio:2/3;overflow:hidden;border-radius:14px;background:#000;isolation:isolate;box-shadow:0 25px 40px #0009;transform:rotateX(0deg) rotateY(0deg);transform-style:preserve-3d;will-change:transform;touch-action:none}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.art{z-index:1;clip-path:inset(4.15% round 9px)}
+.bottom-black{position:absolute;z-index:2;inset:92.1% 0 0;background:#000;pointer-events:none}
+.frame{z-index:3;filter:none!important;animation:none!important;transition:none!important}
+.gem{position:absolute;z-index:5;left:50%;top:3.5969%;width:5.4%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 34% 25%,#f9e5ff 0%,#d8a2f4 16%,#9551bb 43%,#582077 72%,#290d40 100%);box-shadow:inset 0 0 2px 1px #4c1c69,0 0 5px 1px #a35bd1,0 0 10px #58217a;pointer-events:none}
+.gem:before{content:'';position:absolute;inset:14%;background:linear-gradient(140deg,#f0caff 0 25%,#b36bdb 26% 48%,#501569 49% 74%,#d4a2f5 75%);clip-path:polygon(50% 0,90% 30%,80% 76%,50% 100%,18% 72%,10% 28%);opacity:.92}
+.gem.bottom{top:92.60%;width:5.7%}
+.controls{max-width:340px;margin:12px auto;text-align:left}
+.controls label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin:12px 0}
+.controls input{width:65%;accent-color:#cfa454}
+button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9c7;padding:9px 18px}
+
+</style></head><body><main class="wrap">
+<h1>Gorgon • Standard Preview</h1>
+<p>Gorgon artwork • Original gold trim • Interactive tilt • Deep amethyst-purple gemstones • No animated shine or holographic effects</p>
+<div class="stage" id="stage"><div class="card" id="card">
+<img class="art" src="../CE531825-7973-41B0-A404-D2B8C89B6C8E.png" alt="Approved pure-black snake-haired Gorgon silhouette in a moonlit garden of ancient ruins">
+<div class="bottom-black" aria-hidden="true"></div>
+<img class="frame" id="frame-gold" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png?v=gorgon-static-frame-20261023" alt="Original gold card trim">
+<div class="gem top" role="img" aria-label="Top amethyst-purple gemstone"></div>
+<div class="gem bottom" role="img" aria-label="Bottom amethyst-purple gemstone"></div>
+</div></div>
+<div class="controls">
+<label for="vertical">Vertical tilt <input id="vertical" type="range" min="-22" max="22" value="0"></label>
+<label for="horizontal">Horizontal tilt <input id="horizontal" type="range" min="-22" max="22" value="0"></label>
+</div>
+<button id="reset">Reset tilt</button>
+<p id="tilt-status" aria-live="off" style="font-size:12px">Tilt: 0° horizontal / 0° vertical</p>
+</main>
+<script>
+'use strict';
+// Reliable iOS touch dragging + mouse/pointer fallback.
+// Card position is measured from its untransformed layout box to avoid
+// feedback/jitter while rotating. The approved Gorgon artwork and original gold frame remain unchanged.
+const card=document.getElementById('card');
+const stage=document.getElementById('stage');
+const vertical=document.getElementById('vertical');
+const horizontal=document.getElementById('horizontal');
+const readout=document.getElementById('tilt-status');
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+function renderTilt(){
+ const x=Number(horizontal.value),y=Number(vertical.value);
+ card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
+ readout.textContent='Tilt: '+x+'° horizontal / '+y+'° vertical';
+}
+function setTiltFromPosition(clientX,clientY){
+ const stageRect=stage.getBoundingClientRect();
+ const cx=stageRect.left+card.offsetLeft+card.offsetWidth/2;
+ const cy=stageRect.top+card.offsetTop+card.offsetHeight/2;
+ const dx=(clientX-cx)/(card.offsetWidth/2);
+ const dy=(clientY-cy)/(card.offsetHeight/2);
+ horizontal.value=String(Math.round(clamp(dx*22,-22,22)));
+ vertical.value=String(Math.round(clamp(-dy*22,-22,22)));
+ renderTilt();
+}
+vertical.addEventListener('input',renderTilt);
+horizontal.addEventListener('input',renderTilt);
+document.getElementById('reset').addEventListener('click',()=>{
+ vertical.value='0';horizontal.value='0';renderTilt();
+});
+let mouseDragging=false;
+stage.addEventListener('pointerdown',e=>{
+ if(e.pointerType==='touch')return;
+ mouseDragging=true;
+ try{stage.setPointerCapture(e.pointerId)}catch(_){}
+ setTiltFromPosition(e.clientX,e.clientY);
+});
+stage.addEventListener('pointermove',e=>{
+ if(!mouseDragging)return;
+ setTiltFromPosition(e.clientX,e.clientY);
+});
+for(const t of ['pointerup','pointercancel','lostpointercapture']){
+ stage.addEventListener(t,()=>{mouseDragging=false;});
+}
+let activeTouch=null;
+stage.addEventListener('touchstart',e=>{
+ if(activeTouch!==null||!e.changedTouches.length)return;
+ const touch=e.changedTouches[0];
+ activeTouch=touch.identifier;
+ if(e.cancelable)e.preventDefault();
+ setTiltFromPosition(touch.clientX,touch.clientY);
+},{passive:false});
+stage.addEventListener('touchmove',e=>{
+ if(activeTouch===null)return;
+ for(const touch of e.changedTouches){
+  if(touch.identifier===activeTouch){
+   if(e.cancelable)e.preventDefault();
+   setTiltFromPosition(touch.clientX,touch.clientY);
+   break;
+  }
+ }
+},{passive:false});
+function endTouch(e){
+ if(activeTouch===null)return;
+ for(const t of e.changedTouches){
+  if(t.identifier===activeTouch){activeTouch=null;break;}
+ }
+}
+stage.addEventListener('touchend',endTouch,{passive:true});
+stage.addEventListener('touchcancel',endTouch,{passive:true});
+renderTilt();
+
+</script></body></html>
