@@ -5,7 +5,7 @@ Original gold frame: `AF2C4600-A57F-4B3C-8599-5641C23128FE.png`.
 
 ## Approved Standard
 `collectibles/minotaur-standard.html`
-Source preview: `collectibles/minotaur-amber-preview.html`.
+User-approved no-shine preview: `collectibles/minotaur-standard-no-shine.html` (identical to final Standard apart from the page title).
 - Original gold trim with NO shine effect (no frame shine, foil, sparkles, or automatic glint).
 - Amber-orange gemstones at top and bottom.
 - Interactive touch/slider tilt, unchanged artwork and amber-orange gems.
@@ -23,3 +23,6 @@ Approved by user on 2026-10-23. Preserve both final files unless explicitly aske
 
 ## Standard correction — 2026-10-23
 User requested removal of the shine from the final Standard. Removed gold-shine CSS, overlay and mask script from `collectibles/minotaur-standard.html`; preserved gold trim, amber gems and interactive tilt. Holographic final remains unchanged.
+
+## Final confirmation — 2026-10-23
+User confirmed `collectibles/minotaur-standard-no-shine.html` is correct. The canonical `collectibles/minotaur-standard.html` has matching contents except for page title, and is the saved final Standard. It has a static original gold frame (no dynamic gold shine), amber gems, and tilt. Keep the no-shine preview link available for cache-bypass. Holographic card remains unchanged.
