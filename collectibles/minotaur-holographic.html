@@ -389,7 +389,7 @@ renderTilt();
  }
  if(art.complete&&art.naturalWidth)prepare();
  else art.addEventListener('load',prepare,{once:true});
- art.addEventListener('error',()=>{chroma.style.display='none';holo.style.display='none';sweep.style.display='none';particles.style.display='none';passing.style.display='none'},{once:true});
+ art.addEventListener('error',()=>{console.warn('Minotaur artwork failed to load; holographic scenery mask pending')},{once:true});
 })();
 
 
