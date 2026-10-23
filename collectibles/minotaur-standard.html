@@ -11,7 +11,7 @@ h1{font-size:22px;margin:0 0 8px}p{font-size:13px;color:#aac9e9}
 .card img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
 .art{z-index:1;clip-path:inset(4.15% round 9px)}
 .bottom-black{position:absolute;z-index:2;inset:92.1% 0 0;background:#000;pointer-events:none}
-.frame{z-index:3}
+.frame{z-index:3;filter:none!important;animation:none!important;transition:none!important}
 .gem{position:absolute;z-index:5;left:50%;top:3.5969%;width:5.4%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 34% 25%,#fff1b5 0%,#ffc35b 16%,#ed8713 43%,#a34705 72%,#471904 100%);box-shadow:inset 0 0 2px 1px #653009,0 0 5px 1px #d98726,0 0 10px #74320b;pointer-events:none}
 .gem:before{content:'';position:absolute;inset:14%;background:linear-gradient(140deg,#ffe09a 0 25%,#f5a228 26% 48%,#8f3905 49% 74%,#ffbc4a 75%);clip-path:polygon(50% 0,90% 30%,80% 76%,50% 100%,18% 72%,10% 28%);opacity:.92}
 .gem.bottom{top:92.60%;width:5.7%}
@@ -26,7 +26,7 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
 <div class="stage" id="stage"><div class="card" id="card">
 <img class="art" src="../062214A6-7ED1-4363-A9A1-5EC3293F6C7A.png" alt="Approved featureless black horned Minotaur silhouette with battle axe against a sunset wilderness, on cracked flat stone ground">
 <div class="bottom-black" aria-hidden="true"></div>
-<img class="frame" id="frame-gold" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png" alt="Original gold card trim">
+<img class="frame" id="frame-gold" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png?v=minotaur-static-frame-20261023" alt="Original gold card trim">
 <div class="gem top" role="img" aria-label="Top amber-orange gemstone"></div>
 <div class="gem bottom" role="img" aria-label="Bottom amber-orange gemstone"></div>
 </div></div>
@@ -51,8 +51,6 @@ const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 function renderTilt(){
  const x=Number(horizontal.value),y=Number(vertical.value);
  card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
- card.style.setProperty('--gold-angle',(125+x*2.8-y*1.6)+'deg');
- card.style.setProperty('--gold-intensity',String(.65+Math.min(.3,(Math.abs(x)+Math.abs(y))*.009)));
  readout.textContent='Tilt: '+x+'° horizontal / '+y+'° vertical';
 }
 function setTiltFromPosition(clientX,clientY){
