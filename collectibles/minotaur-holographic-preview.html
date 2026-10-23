@@ -107,16 +107,16 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
  filter:drop-shadow(0 0 2px rgba(218,158,249,.29))}
 @keyframes sky-sparkle-rise{
  0%{transform:translate3d(0,15px,0) scale(.6) rotate(-8deg);opacity:0}
- 13%{opacity:.72}
- 35%{transform:translate3d(calc(var(--dx,6px) * .35),-112px,0) scale(.96) rotate(5deg);opacity:.78}
- 52%{opacity:.40}
- 69%{transform:translate3d(calc(var(--dx,6px) * .7),-237px,0) scale(1.04) rotate(-5deg);opacity:.73}
- 88%{opacity:.38}
+ 13%{opacity:.80}
+ 35%{transform:translate3d(calc(var(--dx,6px) * .35),-112px,0) scale(.96) rotate(5deg);opacity:.86}
+ 52%{opacity:.44}
+ 69%{transform:translate3d(calc(var(--dx,6px) * .7),-237px,0) scale(1.04) rotate(-5deg);opacity:.80}
+ 88%{opacity:.42}
  100%{transform:translate3d(var(--dx,6px),-355px,0) scale(.74) rotate(8deg);opacity:0}}
 
 @keyframes sky-star-twinkle{
  0%,15%{transform:scale(.65);opacity:0}
- 32%{transform:scale(1.03);opacity:.64}53%{opacity:.12}70%{opacity:.48}
+ 32%{transform:scale(1.03);opacity:.72}53%{opacity:.15}70%{opacity:.54}
  100%{transform:scale(.68);opacity:0}}
 .sky-pass::before{content:"";position:absolute;top:-24%;left:-56%;width:38%;height:148%;
  background:linear-gradient(90deg,transparent 0%,rgba(118,211,250,.02) 18%,
@@ -160,6 +160,9 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
 <i class="star" style="--x:83%;--y:70%;--s:13px;--t:7.2s;--delay:-4s"></i>
 <i class="star" style="--x:27%;--y:78%;--s:12px;--t:6.5s;--delay:-1.5s"></i>
 <i class="star" style="--x:62%;--y:39%;--s:14px;--t:6.1s;--delay:-4.8s"></i>
+<i class="star rising" style="--x:9%;--y:91%;--s:10px;--t:13.8s;--delay:-6.8s;--dx:5px"></i>
+<i class="star rising rose" style="--x:70%;--y:93%;--s:10px;--t:14.1s;--delay:-9.7s;--dx:-4px"></i>
+<i class="star" style="--x:68%;--y:54%;--s:11px;--t:7.6s;--delay:-3.1s"></i>
 </div>
 <div class="sky-pass" id="sky-pass" aria-hidden="true"></div>
 <div class="bottom-black" aria-hidden="true"></div>
