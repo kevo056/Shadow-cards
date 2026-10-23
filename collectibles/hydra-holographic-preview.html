@@ -139,12 +139,10 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
 .card.ocean-ready .sky-chroma{
  visibility:visible!important;opacity:.87!important;mix-blend-mode:color!important;
  -webkit-mask-image:none!important;mask-image:none!important;
- background:linear-gradient(126deg,#92f5f5 0%,#9cbbff 15%,#d9b5f8 28%,#6edfe5 42%,#e2c7ff 57%,#80c4f7 73%,#ffd7ef 86%,#7adbe8 100%);
- background-size:260% 260%;animation:hydra-foil-drift 8s ease-in-out infinite alternate;
-}
-@keyframes hydra-foil-drift{
- from{background-position:0% 15%}
- to{background-position:100% 80%}
+ background:linear-gradient(var(--chroma-angle,126deg),#92f5f5 0%,#9cbbff 15%,#d9b5f8 28%,#6edfe5 42%,#e2c7ff 57%,#80c4f7 73%,#ffd7ef 86%,#7adbe8 100%);
+ background-size:260% 260%;
+ background-position:var(--chroma-x,50%) var(--chroma-y,50%);
+ animation:none!important;
 }
 /* Original image-mask-based effects remain; these scenery-edge glints are
    independently visible even when iOS Safari silently drops a canvas mask. */
