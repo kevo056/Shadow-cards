@@ -72,11 +72,11 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
  transparent 0%,transparent 8.6%,rgba(151,249,184,.17) 8.9%,
  rgba(202,225,188,.17) 9.1%,transparent 9.4%,transparent 18%);
  opacity:0}
-.card.ocean-ready .ocean-holo{opacity:.79}
+.card.ocean-ready .ocean-holo{opacity:.60}
 /* The reflection is a curved wave, NOT a straight band or timed animation.
    Drawn only when the user tilts; no automatic movement. */
 .ocean-sweep{opacity:0}
-.card.ocean-ready .ocean-sweep{opacity:.42}
+.card.ocean-ready .ocean-sweep{opacity:.34}
 .ocean-sweep canvas{display:block;width:100%;height:100%}
 
 /* Restrained glimmer particles and a separate passing glint.
@@ -137,7 +137,7 @@ button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9
 /* Unicorn iOS visibility repair: color blend retains the artwork's luminance,
    so the solid-black silhouette stays black even without a WebKit image mask. */
 .card.ocean-ready .sky-chroma{
- visibility:visible!important;opacity:.87!important;mix-blend-mode:color!important;
+ visibility:visible!important;opacity:.48!important;mix-blend-mode:color!important;
  -webkit-mask-image:none!important;mask-image:none!important;
  background:linear-gradient(var(--chroma-angle,126deg),#ffb1df 0%,#e2b9ff 15%,#8bc8ff 28%,#90f2de 42%,#fff0a9 57%,#ffc3ab 73%,#e6adff 86%,#90dcff 100%);
  background-size:260% 260%;
