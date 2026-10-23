@@ -20,32 +20,13 @@ h1{font-size:22px;margin:0 0 8px}p{font-size:13px;color:#aac9e9}
 .controls input{width:65%;accent-color:#cfa454}
 button{background:#0e2138;border:1px solid #bd9653;border-radius:8px;color:#f7e9c7;padding:9px 18px}
 
-/* Frame-only metallic shine; the mask is extracted once from the original gold PNG. */
-.gold-shine{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden;opacity:0;mix-blend-mode:screen;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
-.gold-shine.ready{opacity:1}
-.gold-shine::before{content:"";position:absolute;inset:0;
- background:linear-gradient(var(--gold-angle,125deg),
- transparent 4%,rgba(255,208,88,.18) 18%,rgba(255,239,159,.43) 32%,
- rgba(255,255,234,.80) 42%,rgba(255,247,190,.46) 51%,transparent 66%),
- repeating-linear-gradient(132deg,transparent 0 11%,rgba(255,239,178,.18) 11.4%,transparent 12.2% 22%);
- opacity:var(--gold-intensity,.70)}
-.gold-shine::after{content:"";position:absolute;inset:0;
- background:
- linear-gradient(115deg,transparent 34%,rgba(255,229,137,.20) 39%,rgba(255,255,233,.98) 45%,rgba(255,242,165,.72) 48%,transparent 55%),
- linear-gradient(24deg,transparent 38%,rgba(255,241,182,.28) 45%,rgba(255,255,245,.93) 49%,transparent 55%);
- background-size:210% 210%,180% 180%;
- background-position:var(--shine-x,50%) var(--shine-y,50%),var(--shine-x2,50%) var(--shine-y2,50%);
- opacity:var(--shine-strength,.78);
- transition:background-position 70ms linear,opacity 70ms linear}
-@media(prefers-reduced-motion:reduce){.gold-shine::after{transition:none}}
 </style></head><body><main class="wrap">
 <h1>Minotaur • Standard</h1>
-<p>Minotaur artwork • Original gold trim • Interactive tilt • Warm amber-orange gemstones • Tilt-controlled shine on gold trim only • No holographic artwork effects</p>
+<p>Minotaur artwork • Original gold trim • Interactive tilt • Warm amber-orange gemstones • No shine or holographic effects</p>
 <div class="stage" id="stage"><div class="card" id="card">
 <img class="art" src="../062214A6-7ED1-4363-A9A1-5EC3293F6C7A.png" alt="Approved featureless black horned Minotaur silhouette with battle axe against a sunset wilderness, on cracked flat stone ground">
 <div class="bottom-black" aria-hidden="true"></div>
 <img class="frame" id="frame-gold" src="../AF2C4600-A57F-4B3C-8599-5641C23128FE.png" alt="Original gold card trim">
-<div class="gold-shine" id="gold-shine" aria-hidden="true"></div>
 <div class="gem top" role="img" aria-label="Top amber-orange gemstone"></div>
 <div class="gem bottom" role="img" aria-label="Bottom amber-orange gemstone"></div>
 </div></div>
@@ -72,11 +53,6 @@ function renderTilt(){
  card.style.transform='rotateX('+y+'deg) rotateY('+x+'deg)';
  card.style.setProperty('--gold-angle',(125+x*2.8-y*1.6)+'deg');
  card.style.setProperty('--gold-intensity',String(.65+Math.min(.3,(Math.abs(x)+Math.abs(y))*.009)));
- card.style.setProperty('--shine-x',(50+x*2.15)+'%');
- card.style.setProperty('--shine-y',(50-y*2.0)+'%');
- card.style.setProperty('--shine-x2',(50-x*1.6)+'%');
- card.style.setProperty('--shine-y2',(50+y*1.7)+'%');
- card.style.setProperty('--shine-strength',String(.72+Math.min(.28,(Math.abs(x)+Math.abs(y))*.009)));
  readout.textContent='Tilt: '+x+'° horizontal / '+y+'° vertical';
 }
 function setTiltFromPosition(clientX,clientY){
@@ -135,34 +111,5 @@ function endTouch(e){
 stage.addEventListener('touchend',endTouch,{passive:true});
 stage.addEventListener('touchcancel',endTouch,{passive:true});
 renderTilt();
-
-/* Sample the actual frame once; never allow gold light onto the Minotaur or the ruined landscape. */
-(function(){
- const frame=document.getElementById('frame-gold');
- const shine=document.getElementById('gold-shine');
- function prepare(){
-  if(!frame.naturalWidth)return;
-  try{
-   const c=document.createElement('canvas');c.width=512;c.height=768;
-   const ctx=c.getContext('2d',{willReadFrequently:true});
-   ctx.drawImage(frame,0,0,c.width,c.height);
-   const img=ctx.getImageData(0,0,c.width,c.height),p=img.data,w=c.width,h=c.height;
-   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-    const i=(y*w+x)*4,r=p[i],g=p[i+1],b=p[i+2],a=p[i+3];
-    const perimeter=(x<w*.16||x>w*.84||y<h*.105||y>h*.895);
-    const golden=(r>70&&g>38&&r>g*1.10&&g>b*1.14&&r>b*1.34);
-    p[i]=p[i+1]=p[i+2]=255;
-    p[i+3]=perimeter&&golden&&a>10?Math.round(a*.93):0;
-   }
-   ctx.putImageData(img,0,0);
-   const url='url("'+c.toDataURL('image/png')+'")';
-   shine.style.webkitMaskImage=url;shine.style.maskImage=url;
-   shine.classList.add('ready');
-  }catch(err){shine.style.display='none';console.warn('Gold shine disabled because the frame mask was unavailable',err);}
- }
- if(frame.complete&&frame.naturalWidth)prepare();
- else frame.addEventListener('load',prepare,{once:true});
- frame.addEventListener('error',()=>{shine.style.display='none'},{once:true});
-})();
 
 </script></body></html>
