@@ -26,3 +26,6 @@ User requested removal of the shine from the final Standard. Removed gold-shine 
 
 ## Final confirmation — 2026-10-23
 User confirmed `collectibles/minotaur-standard-no-shine.html` is correct. The canonical `collectibles/minotaur-standard.html` has matching contents except for page title, and is the saved final Standard. It has a static original gold frame (no dynamic gold shine), amber gems, and tilt. Keep the no-shine preview link available for cache-bypass. Holographic card remains unchanged.
+
+## Holographic restoration approved — 2026-10-23
+User confirmed `collectibles/minotaur-holographic-restored.html` looks good. The canonical `collectibles/minotaur-holographic.html` has matching effects and markup apart from the page title. The restored iOS mask uses 256×384 sampling with an outer-sky fallback so the green foil and all 21 star sparkles are not silently disabled. Preserve the original automatic shine, amber gems, gold frame, tilt, and black silhouette. Keep both approved final pages unchanged unless asked.
