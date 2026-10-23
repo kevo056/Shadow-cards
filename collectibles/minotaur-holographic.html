@@ -346,9 +346,10 @@ renderTilt();
  function prepare(){
   if(!art.naturalWidth)return;
   try{
-   const w=512,h=768,c=document.createElement('canvas');
+   const w=256,h=384,c=document.createElement('canvas');
    c.width=w;c.height=h;
-   const ctx=c.getContext('2d',{willReadFrequently:true});
+   const ctx=c.getContext('2d',{willReadFrequently:true}) || c.getContext('2d');
+   if(!ctx)throw new Error('Canvas mask context unavailable');
    ctx.drawImage(art,0,0,w,h);
    const img=ctx.getImageData(0,0,w,h),p=img.data;
    const black=new Uint8Array(w*h);
@@ -383,8 +384,14 @@ renderTilt();
    }
    card.classList.add('ocean-ready');
   }catch(err){
-   chroma.style.display='none';holo.style.display='none';sweep.style.display='none';particles.style.display='none';passing.style.display='none';
-   console.warn('Minotaur silhouette protection mask unavailable: effects disabled',err);
+   // Keep the green foil and stars available when iOS cannot build the pixel mask.
+   // The fallback is limited to the outer upper sky, avoiding the black figure.
+   console.warn('Using Minotaur scenery-only foil fallback',err);
+   for(const layer of [chroma,holo,sweep,particles]){
+    layer.style.webkitMaskImage='none';layer.style.maskImage='none';
+    layer.style.clipPath='polygon(0% 4.2%,100% 4.2%,100% 42%,89% 42%,83% 30%,70% 23%,63% 17%,57% 13%,50% 11%,43% 13%,37% 17%,30% 23%,17% 30%,11% 42%,0% 42%)';
+   }
+   card.classList.add('ocean-ready');
   }
  }
  if(art.complete&&art.naturalWidth)prepare();
